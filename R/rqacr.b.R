@@ -12,70 +12,129 @@ rqaCRClass <- if (requireNamespace('jmvcore')) {
             return(FALSE)
           }
 
-          v1_discretised <- "no"
-          v2_discretised <- "no"
+          v1_discretised <- v2_discretised <- "no"
 
           data <- self$data
 
-          # Variable 1 ----
+          # Variables ----
           y1 <- self$options$y1
 
           if(!plyr::is.discrete(data[[y1]])){
             y1vec <- jmvcore::toNumeric(data[[y1]])
-
-            if(self$options$discretise){
-              y1vec <- ts_symbolic(y1vec)
-              v1_discretised <- "yes"
-              } else {
-                y1.vlevel <- paste(typeof(y1vec),"(unit scale)")
-                y1vec <- elascer(y1vec)
-              }
-          } else {
-            if(is.factor(data[[y1]])|is.character(data[[y1]])){
-              if(is.factor(data[[y1]])){
-                y1vec <- as.factor(data[[y1]])
-                y1vec <- as.numeric_factor(y1vec)
-              } else {
-                y1vec <- as.character(data[[y1]])
-                y1vec <- as.numeric_character(y1vec)
-              }
-              if(is.factor(y1vec)&is.ordered(y1vec)){
-                y1.vlevel <- "Ordered categorical"
-              } else {
-                y1.vlevel <- "Unordered categorical"
-              }
-            }
           }
 
-          # Variable 2 ----
           y2 <- self$options$y2
 
           if(!plyr::is.discrete(data[[y2]])){
             y2vec <- jmvcore::toNumeric(data[[y2]])
-
-            if(self$options$discretise){
-              y2vec <- ts_symbolic(y2vec)
-              v2_discretised <- "yes"
-            } else {
-              y2.vlevel <- paste(typeof(y2vec),"(unit scale)")
-              y2vec <- elascer(y2vec)
             }
-          } else {
-            if(is.factor(data[[y2]])|is.character(data[[y2]])){
-              if(is.factor(data[[y2]])){
-                y2vec <- as.factor(data[[y2]])
-                y2vec <- as.numeric_factor(y2vec)
-              } else {
-                y2vec <- as.character(data[[y2]])
-                y2vec <- as.numeric_character(y2vec)
-              }
-              if(is.factor(y2vec)&is.ordered(y2vec)){
-                y2.vlevel <- "Ordered categorical"
-              } else {
-                y2.vlevel <- "Unordered categorical"
-              }
+
+          if(!any(plyr::is.discrete(data[[y1]])&plyr::is.discrete(data[[y2]]),is.numeric(y1vec)&is.numeric(y2vec))){
+            return(FALSE)
+          }
+
+          if(is.numeric(y1vec)&is.numeric(y2vec)){
+
+            y1.vlevel <- ifelse(all(is.wholenumber(y1vec)),"Discrete","Continuous")
+            y2.vlevel <- ifelse(all(is.wholenumber(y2vec)),"Discrete","Continuous")
+
+            if(self$options$standardise=="meanSD"){
+              standardise <- "mean.sd"
+            }
+            if(self$options$standardise=="medianMAD"){
+              standardise <- "median.mad"
+            }
+            if(self$options$standardise=="none"){
+              standardise <- "none"
+            }
+            if(self$options$standardise=="unitScale"){
+              y1vec <- elascer(y1vec)
+              y2vec <- elascer(y2vec)
+              standardise <- "unit scale"
+              y1.vlevel <- "Continuous"
+              y2.vlevel <- "Continuous"
+            }
+            if(self$options$standardise=="symbolicScale"){
+              y1vec <- ts_symbolic(y1vec)
+              y2vec <- ts_symbolic(y2vec)
+              standardise <- "symbolic"
+              y1.vlevel <- "Ordered categorical"
+              y2.vlevel <- "Ordered categorical"
+            }
+
+            if(any(standardise%in%c("mean.sd","median.mad"))){
+              y1vec <- ts_standardise(y1vec, type = standardise,  adjustN = FALSE)
+              y2vec <- ts_standardise(y2vec, type = standardise,  adjustN = FALSE)
+              y1.vlevel <- "Continuous"
+              y2.vlevel <- "Continuous"
             }
           }
+
+            if(plyr::is.discrete(data[[y1]])&plyr::is.discrete(data[[y2]])&self$options$standardise!="symbolicScale"){
+              y1.vlevel <- "Unordered categorical"
+              y2.vlevel <- "Unordered categorical"
+              if(is.factor(data[[y1]])&is.factor(data[[y2]])){
+                y1vec <- as.factor(data[[y1]])
+                y1vec <- as.numeric_factor(y1vec)
+                y2vec <- as.factor(data[[y2]])
+                y2vec <- as.numeric_factor(y2vec)
+                allvalues <- sort(unique(c(y1vec,y2vec)))
+                y1vec <- factor(y1vec,labels = paste0(allvalues), levels = allvalues, ordered = is.ordered(data[[y1]]))
+                y2vec <- factor(y2vec,labels = paste0(allvalues), levels = allvalues, ordered = is.ordered(data[[y2]]))
+                if(is.ordered(y1vec)){
+                  y1.vlevel <- "Ordered categorical"
+                }
+                if(is.ordered(y1vec)){
+                  y2.vlevel <- "Ordered categorical"
+                }
+              }
+              if(is.character(data[[y1]])&is.character(data[[y2]])){
+                y1vec <- as.character(data[[y1]])
+                y2vec <- as.character(data[[y2]])
+                allvalues <- as.numeric_character(sort(unique(c(y1vec,y2vec))))
+                y1vec <- factor(y1vec,labels = names(allvalues), levels = names(allvalues), ordered = is.ordered(data[[y1]]))
+                y2vec <- factor(y2vec,labels = names(allvalues), levels = names(allvalues), ordered = is.ordered(data[[y2]]))
+                if(is.ordered(y1vec)){
+                  y1.vlevel <- "Ordered categorical"
+                }
+                if(is.ordered(y1vec)){
+                  y2.vlevel <- "Ordered categorical"
+                }
+              }
+            }
+
+
+       #   }
+#
+#           # Variable 2 ----
+#           y2 <- self$options$y2
+#
+#           if(!plyr::is.discrete(data[[y2]])){
+#             y2vec <- jmvcore::toNumeric(data[[y2]])
+#
+#             if(self$options$discretise){
+#               y2vec <- ts_symbolic(y2vec)
+#               v2_discretised <- "yes"
+#             } else {
+#               y2.vlevel <- paste(typeof(y2vec),"(unit scale)")
+#               y2vec <- elascer(y2vec)
+#             }
+#           } else {
+#             if(is.factor(data[[y2]])|is.character(data[[y2]])){
+#               if(is.factor(data[[y2]])){
+#                 y2vec <- as.factor(data[[y2]])
+#                 y2vec <- as.numeric_factor(y2vec)
+#               } else {
+#                 y2vec <- as.character(data[[y2]])
+#                 y2vec <- as.numeric_character(y2vec)
+#               }
+#               if(is.factor(y2vec)&is.ordered(y2vec)){
+#                 y2.vlevel <- "Ordered categorical"
+#               } else {
+#                 y2.vlevel <- "Unordered categorical"
+#               }
+#             }
+#           }
 
           TStable <- self$results$tblTS
 
@@ -87,7 +146,7 @@ rqaCRClass <- if (requireNamespace('jmvcore')) {
                            N   = NROW(na.omit(y1vec)),
                            na  = sum(is.na(y1vec)),
                            uni_obs = length(unique(na.omit(y1vec))),
-                           discretised = v1_discretised)
+                           transformed = standardise)
           )
           TStable$setRow(rowNo=2,
                          values=list(
@@ -96,7 +155,7 @@ rqaCRClass <- if (requireNamespace('jmvcore')) {
                            N   = NROW(na.omit(y2vec)),
                            na  = sum(is.na(y2vec)),
                            uni_obs = length(unique(na.omit(y2vec))),
-                           discretised = v2_discretised)
+                           transformed = standardise)
           )
 
           # tsData <- data.frame(t  = seq_along(data[[y1]]),

@@ -26,11 +26,30 @@ children:
     margin: large
     children:
       - type: Label
-        label: Discretise?
+        label: Adjust time series
         children:
-          - type: CheckBox
-            label: Change to symbolic representation
-            name: discretise
+          - type: RadioButton
+            name: standardise_none
+            optionName: standardise
+            optionPart: none
+          - type: RadioButton
+            name: standardise_meanSD
+            optionName: standardise
+            optionPart: meanSD
+          - type: RadioButton
+            name: standardise_medianMAD
+            optionName: standardise
+            optionPart: medianMAD
+          - type: RadioButton
+            name: standardise_unit
+            optionName: standardise
+            optionPart: unitScale
+          - type: RadioButton
+            name: standardise_symbolic
+            optionName: standardise
+            optionPart: symbolicScale
+
+
   - type: CollapseBox
     label: Phase Space Parameters
     collapsed: false

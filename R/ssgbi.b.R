@@ -557,7 +557,11 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         flist <- c("0" = "grey80","1" = "grey50")
         clist <- c("Last" = "red3","First" = "steelblue4", "NA" = "orange")
         slist <- c("1"=3, "2" = 6, "3"= 8, "4" = 10)
-        pal <- scales::col_factor(palette="Accent", domain=NULL)(unique(trajectories$Trajectory:trajectories$Wave))
+        if(length(unique(trajectories$Trajectory:trajectories$Wave))>1){
+          pal <- scales::col_factor(palette="Accent", domain=NULL)(unique(trajectories$Trajectory:trajectories$Wave))
+        } else {
+          pal <- "#AAB2A9"
+        }
 
         ssgr <- ggplot2::ggplot(durData, ggplot2::aes_(x=~y1,y=~y2,group=~value)) +
           ggplot2::geom_raster(ggplot2::aes_(fill=~value), alpha =.5, show.legend = FALSE) +
@@ -573,7 +577,7 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                               arrow= grid::arrow(angle = 15, length = grid::unit(0.015, units = "npc"), type = "closed"),
                               alpha=1, size=1, arrow.fill = "black") +
           ggplot2::guides(colour = "legend",size="none",fill="none") +
-          ggplot2::scale_color_manual("Trajectory", values = pal) +
+          #ggplot2::scale_color_manual("Trajectory", values = pal) +
           ggplot2::scale_fill_manual(values = flist) +
           ggplot2::scale_size_manual(breaks = 1:4,values = slist) +
           ggplot2::scale_x_discrete(self$options$y1,expand = c(0,0),breaks = LABS_v1,labels = LABS_v1) +

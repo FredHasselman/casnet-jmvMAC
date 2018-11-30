@@ -1624,7 +1624,8 @@ crqa_diagPofile <- function(RM,
     stop("Diagonal window must be 1 positive integer!!")
   }
 
-  B <- rp_nzdiags(RM,d=diagWin,returnNZ = FALSE)
+  rp_lineDist(RM,d = diagWin, matrices = TRUE)
+  B <- rp_nzdiags(RM,d=diagWin,removeNZ = FALSE)
   diagID <- 1:NCOL(B)
   names(diagID) <- colnames(B)
 
@@ -1788,15 +1789,19 @@ rp_nzdiags <- function(RM=NULL, d=NULL, returnVectorList=TRUE, returnNZtriplets=
     nzdiags  <- data.frame(row   = nzdiagsM@i,
                            col   = nzdiagsM@j,
                            value = nzdiagsM@x,
-                           ndiag = nzdiagsM@j-nzdiagsM@i)
+                           ndiag = (nzdiagsM@j)-(nzdiagsM@i))
     nzdiags <- dplyr::arrange(nzdiags,nzdiags$ndiag)
 
+ if(removeNZ){
     if(!is.null(d)){
       nd <- unique(nzdiags$ndiag)
       # Get diagonals which have nonzero elements
       d <- nd[nd%in%sort(as.vector(d))]
     } else {
       d <- unique(nzdiags$ndiag)
+    }
+   } else {
+      d <-  c(-1*rev(1:(NCOL(nzdiagsM)-1)),0,1:(NCOL(nzdiagsM)-1))
     }
 
     indMat <- col(RM)-row(RM)
@@ -1817,7 +1822,7 @@ rp_nzdiags <- function(RM=NULL, d=NULL, returnVectorList=TRUE, returnNZtriplets=
       B[(nzdiags$row[nzdiags$ndiag==d[i]])+1,i] <- nzdiags$value[nzdiags$ndiag==d[i]]
     }
 
-    zID <- which(colSums(B)==0)
+    zID <- which(Matrix::colSums(Matrix::as.matrix(B))==0)
     if(length(zID)>0){
       if(removeNZ){
       B  <- B[,-zID]
@@ -1834,6 +1839,8 @@ rp_nzdiags <- function(RM=NULL, d=NULL, returnVectorList=TRUE, returnNZtriplets=
     } else {
       return(B)
     }
+  } else {
+    stop("Input to rp_nzdiags is not a matrix-like object.")
   }
 }
 
@@ -2020,8 +2027,11 @@ rp_lineDist <- function(RM,
   }
 
   B <- rp_nzdiags(RP)
-  V <- Matrix::as.matrix(RP)[,colSums(Matrix::as.matrix(RP))>0]
+  nzV <- which(colSums(Matrix::as.matrix(RP))>0)
+  V <- Matrix::as.matrix(Matrix::as.matrix(RP)[,nzV])
+  colnames(V) <- nzV
 
+  rm(RP)
   if(Matrix::isSymmetric(unname(RM))){
     if(all(Matrix::diag(RM)==1)){
       RP <- bandReplace(Matrix::t(RM),0,0,0)
@@ -2030,7 +2040,9 @@ rp_lineDist <- function(RM,
     RP <- Matrix::t(RM)
   }
 
-  H <- Matrix::as.matrix(RP)[,colSums(Matrix::as.matrix(RP))>0]
+  nzH <- which(colSums(Matrix::as.matrix(RP))>0)
+  H <- Matrix::as.matrix(Matrix::as.matrix(RP)[,nzH])
+  colnames(H) <- nzH
   rm(RP)
 
   # Get diagonal lines & pad with zeros
@@ -2230,11 +2242,11 @@ rp <- function(y1, y2 = NULL,
   et1 <- ts_embed(y1, emDim, emLag, silent = silent)
   et2 <- ts_embed(y2, emDim, emLag, silent = silent)
 
-   dist_method <- try_CATCH(proxy::pr_DB$get_entry(method))
+  # dist_method <- try_CATCH(proxy::pr_DB$get_entry(method))
   # if("error"%in%class(dist_method$value)){
   #   stop("Unknown distance metric!\nUse proxy::pr_DB$get_entries() to see a list of valid options.")
   # } else {
-    dmat <- flexclust::dist2(x=et1,y=et2,
+    dmat <- flexclust::dist2(x=et2,y=et1,
                         method = tolower(method))
   #}
 
@@ -2412,7 +2424,7 @@ rp_plot <- function(RM, plotDimensions= FALSE, plotMeasures = FALSE, plotRadiusR
 
 
   # check auto-recurrence and make sure Matrix has sparse triplet representation
-  if(is.null(RM)){
+  if(is.null(attr(RM,"AUTO"))){
     RM   <- rp_checkfix(RM, checkAUTO = TRUE)
   }
 
@@ -2458,7 +2470,7 @@ rp_plot <- function(RM, plotDimensions= FALSE, plotMeasures = FALSE, plotRadiusR
   }
 
   # main plot
-  gRP <-  ggplot2::ggplot(ggplot2::aes_(x=~Var1, y=~Var2, fill = ~value), data= meltRP) +
+  gRP <-  ggplot2::ggplot(ggplot2::aes_(x=~Var2, y=~Var1, fill = ~value), data= meltRP) +
     ggplot2::geom_raster(hjust = 0, vjust=0,show.legend = FALSE) +
     ggplot2::geom_abline(slope = 1,colour = "grey50", size = 1)
   #ggtitle(label=title, subtitle = ifelse(AUTO,"Auto-recurrence plot","Cross-recurrence plot")) +
