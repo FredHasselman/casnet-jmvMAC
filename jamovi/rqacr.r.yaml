@@ -51,7 +51,7 @@ items:
         - fixed
         - theiler
         - norm
-
+        - standardise
     - name:  tblRP
       title: "Global CRQA measures"
       type: Table
@@ -73,6 +73,7 @@ items:
         - fixed
         - theiler
         - norm
+        - standardise
       columns:
        - name: RP
          title: "# recurrences"
@@ -117,6 +118,7 @@ items:
         - fixed
         - theiler
         - norm
+        - standardise
       columns:
        - name: LineType
          title: "Line type"
@@ -173,5 +175,6 @@ items:
         - norm
         - plotDP
         - diagWin
+        - standardise
 
 ...

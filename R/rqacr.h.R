@@ -246,7 +246,8 @@ rqaCRResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "fixRAD",
                     "fixed",
                     "theiler",
-                    "norm")))
+                    "norm",
+                    "standardise")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="tblRP",
@@ -268,7 +269,8 @@ rqaCRResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "fixRAD",
                     "fixed",
                     "theiler",
-                    "norm"),
+                    "norm",
+                    "standardise"),
                 columns=list(
                     list(
                         `name`="RP", 
@@ -319,7 +321,8 @@ rqaCRResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "fixRAD",
                     "fixed",
                     "theiler",
-                    "norm"),
+                    "norm",
+                    "standardise"),
                 columns=list(
                     list(
                         `name`="LineType", 
@@ -385,7 +388,8 @@ rqaCRResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "theiler",
                     "norm",
                     "plotDP",
-                    "diagWin")))}))
+                    "diagWin",
+                    "standardise")))}))
 
 rqaCRBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "rqaCRBase",

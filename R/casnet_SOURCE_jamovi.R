@@ -1844,123 +1844,123 @@ rp_nzdiags <- function(RM=NULL, d=NULL, returnVectorList=TRUE, returnNZtriplets=
   }
 }
 
-
-rp_nzdiags_matlab <- function(RP,d=NULL){
-  # Loosely based on MATLAB function spdiags() by Rob Schreiber - Copyright 1984-2014 The MathWorks, Inc.
-  #require(Matrix)
-
-  if(grepl("matrix",class(RP),ignore.case = TRUE)){
-
-    A <- RP
-
-    if(all(A>0)){warning("All matrix elements are nonzero.")}
-
-    # create an indicator for all diagonals in the matrix
-    ind   <- col(A)-row(A)
-
-    # Split the matrix!
-    spd <- split(A, ind)
-
-    if(is.null(d)){
-
-      # Get diagonals which have nonzero elements
-      keepID <-plyr::ldply(spd, function(di) any(di>0))
-      nzdiag <- spd[keepID$V1]
-      # Indices of nonzero diagonals
-      d      <- as.numeric(keepID$.id[keepID$V1])
-
-    } else {
-
-      # Diagonals are specified
-      d <- sort(as.vector(d))
-      keepID <- names(spd)%in%d
-      nzdiag <- spd[keepID]
-    }
-
-    # Deal with uneven rows and cols
-    m  <- NROW(A)
-    n  <- NCOL(A)
-    p  <- length(d)
-    if(is.logical(A)){
-      B <- matrix(FALSE,nrow = min(c(m,n), na.rm = TRUE), ncol = p)
-    } else {
-      B <- matrix(0, nrow = min(c(m,n), na.rm = TRUE), ncol = p)
-    }
-
-    for(i in seq_along(d)){
-      B[zoo::index(nzdiag[[i]]),i] <- nzdiag[[i]]
-    }
-    colnames(B) <- paste(d)
-
-    return(B)
-  }
-}
-
-
-rp_nzdiags_chroma <- function(RP, d=NULL){
-  # Loosely based on MATLAB function spdiags() by Rob Schreiber - Copyright 1984-2014 The MathWorks, Inc.
-  #require(Matrix)
-
-  if(grepl("matrix",class(RP),ignore.case = TRUE)){
-
-    A <- RP
-
-    if(all(A>0)){warning("All matrix elements are nonzero.")}
-
-    # create an indicator for all diagonals in the matrix
-    ind   <- col(A)-row(A)
-
-    # Split the matrix!
-    spd <- split(A, ind)
-
-    if(is.null(d)){
-
-      # Get diagonals which have nonzero elements
-      keepID <-plyr::ldply(spd, function(di) any(di>0))
-      nzdiag <- spd[keepID$V1]
-      # Indices of nonzero diagonals
-      d      <- as.numeric(keepID$.id[keepID$V1])
-
-    } else {
-
-      # Diagonals are specified
-      d <- sort(as.vector(d))
-      keepID <-  names(spd)%in%d
-      nzdiag <- spd[keepID]
-    }
-
-    # Deal with uneven rows and cols
-    m  <- NROW(A)
-    n  <- NCOL(A)
-    p  <- length(d)
-    if(is.logical(A)){
-      B <- matrix(FALSE,nrow = min(c(m,n), na.rm = TRUE), ncol = p)
-    } else {
-      B <- matrix(0, nrow = min(c(m,n), na.rm = TRUE), ncol = p)
-    }
-
-    for(i in seq_along(d)){
-      B[zoo::index(nzdiag[[i]]),i] <- nzdiag[[i]]
-    }
-    colnames(B) <- paste(d)
-
-    return(B)
-  }
-}
+#
+# rp_nzdiags_matlab <- function(RP,d=NULL){
+#   # Loosely based on MATLAB function spdiags() by Rob Schreiber - Copyright 1984-2014 The MathWorks, Inc.
+#   #require(Matrix)
+#
+#   if(grepl("matrix",class(RP),ignore.case = TRUE)){
+#
+#     A <- RP
+#
+#     if(all(A>0)){warning("All matrix elements are nonzero.")}
+#
+#     # create an indicator for all diagonals in the matrix
+#     ind   <- col(A)-row(A)
+#
+#     # Split the matrix!
+#     spd <- split(A, ind)
+#
+#     if(is.null(d)){
+#
+#       # Get diagonals which have nonzero elements
+#       keepID <-plyr::ldply(spd, function(di) any(di>0))
+#       nzdiag <- spd[keepID$V1]
+#       # Indices of nonzero diagonals
+#       d      <- as.numeric(keepID$.id[keepID$V1])
+#
+#     } else {
+#
+#       # Diagonals are specified
+#       d <- sort(as.vector(d))
+#       keepID <- names(spd)%in%d
+#       nzdiag <- spd[keepID]
+#     }
+#
+#     # Deal with uneven rows and cols
+#     m  <- NROW(A)
+#     n  <- NCOL(A)
+#     p  <- length(d)
+#     if(is.logical(A)){
+#       B <- matrix(FALSE,nrow = min(c(m,n), na.rm = TRUE), ncol = p)
+#     } else {
+#       B <- matrix(0, nrow = min(c(m,n), na.rm = TRUE), ncol = p)
+#     }
+#
+#     for(i in seq_along(d)){
+#       B[zoo::index(nzdiag[[i]]),i] <- nzdiag[[i]]
+#     }
+#     colnames(B) <- paste(d)
+#
+#     return(B)
+#   }
+# }
+#
+#
+# rp_nzdiags_chroma <- function(RP, d=NULL){
+#   # Loosely based on MATLAB function spdiags() by Rob Schreiber - Copyright 1984-2014 The MathWorks, Inc.
+#   #require(Matrix)
+#
+#   if(grepl("matrix",class(RP),ignore.case = TRUE)){
+#
+#     A <- RP
+#
+#     if(all(A>0)){warning("All matrix elements are nonzero.")}
+#
+#     # create an indicator for all diagonals in the matrix
+#     ind   <- col(A)-row(A)
+#
+#     # Split the matrix!
+#     spd <- split(A, ind)
+#
+#     if(is.null(d)){
+#
+#       # Get diagonals which have nonzero elements
+#       keepID <-plyr::ldply(spd, function(di) any(di>0))
+#       nzdiag <- spd[keepID$V1]
+#       # Indices of nonzero diagonals
+#       d      <- as.numeric(keepID$.id[keepID$V1])
+#
+#     } else {
+#
+#       # Diagonals are specified
+#       d <- sort(as.vector(d))
+#       keepID <-  names(spd)%in%d
+#       nzdiag <- spd[keepID]
+#     }
+#
+#     # Deal with uneven rows and cols
+#     m  <- NROW(A)
+#     n  <- NCOL(A)
+#     p  <- length(d)
+#     if(is.logical(A)){
+#       B <- matrix(FALSE,nrow = min(c(m,n), na.rm = TRUE), ncol = p)
+#     } else {
+#       B <- matrix(0, nrow = min(c(m,n), na.rm = TRUE), ncol = p)
+#     }
+#
+#     for(i in seq_along(d)){
+#       B[zoo::index(nzdiag[[i]]),i] <- nzdiag[[i]]
+#     }
+#     colnames(B) <- paste(d)
+#
+#     return(B)
+#   }
+# }
 
 
 
 
 #' Line length distributions
 #'
-#' @param RP A thresholded recurrence matrix (binary: 0 - 1)
+#' @param RM A thresholded recurrence matrix (binary: 0 - 1)
 #' @param DLmin Minimal diagonal line length (default = \code{2})
 #' @param VLmin Minimal vertical line length (default = \code{2})
 #' @param HLmin Minimal horizontal line length (default = \code{2})
 #' @param DLmax Maximal diagonal line length (default = length of diagonal -1)
 #' @param VLmax Maximal vertical line length (default = length of diagonal -1)
 #' @param HLmax Maximal horizontal line length (default = length of diagonal -1)
-#' @param d Vector of diagonals to be extracted from matrix \code{RP} before line length distributions are calculated. A one element vector will be interpreted as a windowsize, e.g., \code{d = 50} will extract the diagonal band \code{-50:50}. A two element vector will be interpreted as a band, e.g. \code{d = c(-50,100)} will extract diagonals \code{-50:100}. If \code{length(d) > 2}, the numbers will be interpreted to refer to individual diagonals, \code{d = c(-50,50,100)} will extract diagonals \code{-50,50,100}.
+#' @param d Vector of diagonals to be extracted from matrix \code{RM} before line length distributions are calculated. A one element vector will be interpreted as a windowsize, e.g., \code{d = 50} will extract the diagonal band \code{-50:50}. A two element vector will be interpreted as a band, e.g. \code{d = c(-50,100)} will extract diagonals \code{-50:100}. If \code{length(d) > 2}, the numbers will be interpreted to refer to individual diagonals, \code{d = c(-50,50,100)} will extract diagonals \code{-50,50,100}.
 #' @param theiler Size of the theiler window, e.g. \code{theiler = 1} removes diagonal bands -1,0,1 from the matrix. If \code{length(d)} is \code{NULL}, 1 or 2, the theiler window is applied before diagonals are extracted. The theiler window is ignored if \code{length(d)>2}, or if it is larger than the matrix or band indicated by parameter \code{d}.
 #' @param invert Relevant for Recurrence Time analysis: Return the distribution of 0 valued segments in nonzero diagonals/verticals/horizontals. This indicates the time between subsequent line structures.
 #' @param AUTO Is this an AUTO RQA?
@@ -2018,6 +2018,7 @@ rp_lineDist <- function(RM,
     RM <- bandReplace(RM,-theiler,theiler,0)
   }
 
+  RP <- matrix(0,ncol=NCOL(RM),nrow = NROW(rm))
   if(Matrix::isSymmetric(unname(RM))){
     if(all(Matrix::diag(RM)==1)){
       RP <- bandReplace(RM,0,0,0)
@@ -2026,12 +2027,14 @@ rp_lineDist <- function(RM,
     RP <- RM
   }
 
+
   B <- rp_nzdiags(RP)
+  if(length(B)==0){B<-as.matrix(0)}
   nzV <- which(colSums(Matrix::as.matrix(RP))>0)
   V <- Matrix::as.matrix(Matrix::as.matrix(RP)[,nzV])
   colnames(V) <- nzV
 
-  rm(RP)
+  RP <- matrix(0,ncol=NCOL(RM),nrow = NROW(rm))
   if(Matrix::isSymmetric(unname(RM))){
     if(all(Matrix::diag(RM)==1)){
       RP <- bandReplace(Matrix::t(RM),0,0,0)
@@ -2245,9 +2248,10 @@ rp <- function(y1, y2 = NULL,
   # dist_method <- try_CATCH(proxy::pr_DB$get_entry(method))
   # if("error"%in%class(dist_method$value)){
   #   stop("Unknown distance metric!\nUse proxy::pr_DB$get_entries() to see a list of valid options.")
-  # } else {
-    dmat <- flexclust::dist2(x=et2,y=et1,
-                        method = tolower(method))
+  #  } else {
+    # dmat <- proxy::dist(x=et2, y=et1,
+    #                     method = tolower(method))
+    dmat <- flexclust::dist2(x=et2, y=et1, method = tolower(method))
   #}
 
   # Remove proxy class
@@ -2524,7 +2528,7 @@ rp_plot <- function(RM, plotDimensions= FALSE, plotMeasures = FALSE, plotRadiusR
       resol <- resol[-1,]
 
       breaks <- RecScale$RR
-      if(round(diff(breaks))==0){
+      if(any(round(diff(breaks))==0)){
         id <- which(round(diff(breaks))==0)
         breaks[id] <- (breaks[id] + mean(diff(breaks[id]),na.rm=TRUE))
       }
