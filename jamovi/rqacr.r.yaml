@@ -52,6 +52,7 @@ items:
         - theiler
         - norm
         - standardise
+
     - name:  tblRP
       title: "Global CRQA measures"
       type: Table
