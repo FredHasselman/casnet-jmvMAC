@@ -209,8 +209,8 @@ rqaAUResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         `type`="integer", 
                         `title`="NA values"),
                     list(
-                        `name`="discretised", 
-                        `title`="discretised?", 
+                        `name`="transformed", 
+                        `title`="transformation", 
                         `type`="text"),
                     list(
                         `name`="uni_obs", 
