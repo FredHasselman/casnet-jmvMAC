@@ -125,6 +125,7 @@ children:
       - type: ComboBox
         label: Distance norm
         name: norm
+
   - type: CollapseBox
     label: Diagonal Recurrence Profile
     collapsed: true
