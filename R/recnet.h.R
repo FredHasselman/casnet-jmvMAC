@@ -12,7 +12,11 @@ recNetOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             emDim = 1,
             Gweight = NULL,
             Gdirect = NULL,
+            Glabels = NULL,
             Glayout = NULL,
+            PruneDegree = 0,
+            PruneWeight = 0,
+            nsize = "degree",
             fixRR = 0.05,
             fixRAD = 0,
             fixed = "RAD",
@@ -58,16 +62,36 @@ recNetOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$..Gdirect <- jmvcore::OptionBool$new(
                 "Gdirect",
                 Gdirect)
+            private$..Glabels <- jmvcore::OptionBool$new(
+                "Glabels",
+                Glabels)
             private$..Glayout <- jmvcore::OptionList$new(
                 "Glayout",
                 Glayout,
                 options=list(
                     "ci",
                     "st",
-                    "ci",
                     "ni",
+                    "tr",
                     "fr",
-                    "kk"))
+                    "md",
+                    "cl"))
+            private$..PruneDegree <- jmvcore::OptionNumber$new(
+                "PruneDegree",
+                PruneDegree,
+                default=0)
+            private$..PruneWeight <- jmvcore::OptionNumber$new(
+                "PruneWeight",
+                PruneWeight,
+                default=0)
+            private$..nsize <- jmvcore::OptionList$new(
+                "nsize",
+                nsize,
+                default="degree",
+                options=list(
+                    "degree",
+                    "hubscore",
+                    "fixed"))
             private$..fixRR <- jmvcore::OptionNumber$new(
                 "fixRR",
                 fixRR,
@@ -130,7 +154,11 @@ recNetOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..emDim)
             self$.addOption(private$..Gweight)
             self$.addOption(private$..Gdirect)
+            self$.addOption(private$..Glabels)
             self$.addOption(private$..Glayout)
+            self$.addOption(private$..PruneDegree)
+            self$.addOption(private$..PruneWeight)
+            self$.addOption(private$..nsize)
             self$.addOption(private$..fixRR)
             self$.addOption(private$..fixRAD)
             self$.addOption(private$..fixed)
@@ -150,7 +178,11 @@ recNetOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         emDim = function() private$..emDim$value,
         Gweight = function() private$..Gweight$value,
         Gdirect = function() private$..Gdirect$value,
+        Glabels = function() private$..Glabels$value,
         Glayout = function() private$..Glayout$value,
+        PruneDegree = function() private$..PruneDegree$value,
+        PruneWeight = function() private$..PruneWeight$value,
+        nsize = function() private$..nsize$value,
         fixRR = function() private$..fixRR$value,
         fixRAD = function() private$..fixRAD$value,
         fixed = function() private$..fixed$value,
@@ -169,7 +201,11 @@ recNetOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..emDim = NA,
         ..Gweight = NA,
         ..Gdirect = NA,
+        ..Glabels = NA,
         ..Glayout = NA,
+        ..PruneDegree = NA,
+        ..PruneWeight = NA,
+        ..nsize = NA,
         ..fixRR = NA,
         ..fixRAD = NA,
         ..fixed = NA,
@@ -188,7 +224,7 @@ recNetResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     active = list(
         tblTS = function() private$.items[["tblTS"]],
         rpplot = function() private$.items[["rpplot"]],
-        plot = function() private$.items[["plot"]]),
+        rnetplot = function() private$.items[["rnetplot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -249,15 +285,16 @@ recNetResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "fixed",
                     "theiler",
                     "norm",
-                    "standardise")))
+                    "standardise",
+                    "Gweight")))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="plot",
+                name="rnetplot",
                 title="Recurrence Network",
                 width=600,
                 height=600,
-                visible=FALSE,
-                renderFun=".DPplot",
+                visible=TRUE,
+                renderFun=".rnetplot",
                 clearWith=list(
                     "y1",
                     "emRad",
@@ -274,9 +311,14 @@ recNetResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "fixed",
                     "theiler",
                     "norm",
-                    "plotDP",
-                    "diagWin",
-                    "standardise")))}))
+                    "Gdirect",
+                    "Gweight",
+                    "Glayout",
+                    "standardise",
+                    "nsize",
+                    "Glabels",
+                    "PruneDegree",
+                    "PruneWeight")))}))
 
 recNetBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "recNetBase",
@@ -307,7 +349,11 @@ recNetBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param emDim .
 #' @param Gweight .
 #' @param Gdirect .
+#' @param Glabels .
 #' @param Glayout .
+#' @param PruneDegree .
+#' @param PruneWeight .
+#' @param nsize .
 #' @param fixRR .
 #' @param fixRAD .
 #' @param fixed .
@@ -323,7 +369,7 @@ recNetBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$tblTS} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$rpplot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$rnetplot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -341,7 +387,11 @@ recNet <- function(
     emDim = 1,
     Gweight,
     Gdirect,
+    Glabels,
     Glayout,
+    PruneDegree = 0,
+    PruneWeight = 0,
+    nsize = "degree",
     fixRR = 0.05,
     fixRAD = 0,
     fixed = "RAD",
@@ -369,7 +419,11 @@ recNet <- function(
         emDim = emDim,
         Gweight = Gweight,
         Gdirect = Gdirect,
+        Glabels = Glabels,
         Glayout = Glayout,
+        PruneDegree = PruneDegree,
+        PruneWeight = PruneWeight,
+        nsize = nsize,
         fixRR = fixRR,
         fixRAD = fixRAD,
         fixed = fixed,

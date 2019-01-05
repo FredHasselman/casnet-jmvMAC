@@ -225,7 +225,8 @@ rqaAUClass <- if (requireNamespace("jmvcore")) {
                           relENT = crqa_out$ENTrel_hl,
                           CoV    = crqa_out$CoV_hl)
                         )
-        dpImage <- self$results$DPplot
+
+          dpImage <- self$results$DPplot
 
         if(self$options$plotDP==FALSE){
           dpImage$setVisible(visible=FALSE)
@@ -257,7 +258,7 @@ rqaAUClass <- if (requireNamespace("jmvcore")) {
 
        #   if(plyr::is.discrete(df$y1)){
 
-          rppl <-    rp_plot(rm, plotDimensions = TRUE, xlab = self$options$y1, ylab = self$options$y1, radiusValue = attributes(rm)$emRad, plotRadiusRRbar = RadiusRRbar)
+          rppl <- rp_plot(rm, plotDimensions = TRUE, xlab = self$options$y1, ylab = self$options$y1, radiusValue = attributes(rm)$emRad, plotRadiusRRbar = RadiusRRbar)
 
           print(rppl)
           TRUE

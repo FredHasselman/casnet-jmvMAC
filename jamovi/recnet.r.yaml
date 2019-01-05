@@ -52,15 +52,16 @@ items:
           - theiler
           - norm
           - standardise
+          - Gweight
 
 
-    - name: plot
+    - name: rnetplot
       title: "Recurrence Network"
       type: Image
       width: 600
       height: 600
-      visible: false
-      renderFun: .DPplot
+      visible: true
+      renderFun: .rnetplot
       clearWith:
         - y1
         - emRad
@@ -77,7 +78,16 @@ items:
         - fixed
         - theiler
         - norm
-        - plotDP
-        - diagWin
+        - Gdirect
+        - Gweight
+        - Glayout
         - standardise
+        - nsize
+        - Glabels
+        - PruneDegree
+        - PruneWeight
+
+
+
+
 ...

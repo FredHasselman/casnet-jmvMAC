@@ -1,7 +1,7 @@
 ---
 name:  recNet
 title: Recurrence Networks
-menuGroup: casnet-jmvMAC
+menuGroup: casnetjmv
 version: '1.0.0'
 jas: '1.2'
 
@@ -46,6 +46,9 @@ options:
     - name: Gdirect
       title: Directed
       type: Bool
+    - name: Glabels
+      title: Add labels (time)
+      type: Bool
     - name: Glayout
       title: Graph layout
       type: List
@@ -54,15 +57,38 @@ options:
          title: "Circle"
        - name: st
          title: "Star"
-       - name: ci
-         title: "Circle"
        - name: ni
          title: "Nicely"
+       - name: tr
+         title: "Tree"
        - name: fr
          title: "Fruchterman-Reingold"
-       - name: kk
-         title: "Kamada-Kawai"
+       - name: md
+         title: "Multidimensional scaling"
+       - name: cl
+         title: "Cluster by segments of time"
 
+    - name: PruneDegree
+      title: "Prune by node degree"
+      type: Number
+      default: 0
+
+    - name: PruneWeight
+      title: "Prune by edge weight"
+      type: Number
+      default: 0
+
+    - name: nsize
+      title: "Node size"
+      type: List
+      default: degree
+      options:
+       - name: degree
+         title: "Node degree"
+       - name: hubscore
+         title: "Node hubscore"
+       - name: fixed
+         title: "Same size"
 
     - name: fixRR
       title: "RR"

@@ -5,7 +5,8 @@
 \title{Recurrence Networks}
 \usage{
 recNet(data, y1, standardise = "none", emLag = 1, emDim = 1, Gweight,
-  Gdirect, Glayout, fixRR = 0.05, fixRAD = 0, fixed = "RAD",
+  Gdirect, Glabels, Glayout, PruneDegree = 0, PruneWeight = 0,
+  nsize = "degree", fixRR = 0.05, fixRAD = 0, fixed = "RAD",
   DLmin = 2, DLmax = 0, VLmin = 2, VLmax = 0, HLmin = 2,
   HLmax = 0, theiler = 0, norm = "euclidean")
 }
@@ -24,7 +25,15 @@ recNet(data, y1, standardise = "none", emLag = 1, emDim = 1, Gweight,
 
 \item{Gdirect}{.}
 
+\item{Glabels}{.}
+
 \item{Glayout}{.}
+
+\item{PruneDegree}{.}
+
+\item{PruneWeight}{.}
+
+\item{nsize}{.}
 
 \item{fixRR}{.}
 
@@ -53,7 +62,7 @@ A results object containing:
 \tabular{llllll}{
   \code{results$tblTS} \tab \tab \tab \tab \tab a table \cr
   \code{results$rpplot} \tab \tab \tab \tab \tab an image \cr
-  \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+  \code{results$rnetplot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -1,14 +1,14 @@
 Package: pracma
 Type: Package
-Version: 2.1.1
-Date: 2017-11-21
+Version: 2.2.2
+Date: 2018-11-30
 Title: Practical Numerical Math Functions
 Authors@R: person("Hans W.", "Borchers", 
                   email="hwborchers@googlemail.com", 
                   role=c("aut", "cre"))
 Depends: R (>= 3.1.0)
 Imports: graphics, grDevices, stats, utils
-Suggests: quadprog
+Suggests: NlcOptim, quadprog
 Description: 
     Provides a large number of functions from numerical analysis and
     linear algebra, numerical optimization, differential equations,
@@ -21,9 +21,9 @@ Author: Hans W. Borchers [aut, cre]
 Maintainer: Hans W. Borchers <hwborchers@googlemail.com>
 Repository: CRAN
 Repository/R-Forge/Project: optimist
-Repository/R-Forge/Revision: 445
-Repository/R-Forge/DateTimeStamp: 2017-11-21 15:51:04
-Date/Publication: 2017-11-21 17:15:00 UTC
+Repository/R-Forge/Revision: 464
+Repository/R-Forge/DateTimeStamp: 2018-12-01 21:21:42
+Date/Publication: 2018-12-02 08:00:03 UTC
 NeedsCompilation: no
-Packaged: 2017-11-21 16:05:12 UTC; rforge
-Built: R 3.3.2; ; 2017-11-22 15:28:40 UTC; unix
+Packaged: 2018-12-01 21:30:11 UTC; rforge
+Built: R 3.3.0; ; 2018-12-14 20:15:01 UTC; unix

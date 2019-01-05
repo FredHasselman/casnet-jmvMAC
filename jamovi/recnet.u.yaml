@@ -48,12 +48,46 @@ children:
       - type: LayoutBox
         margin: large
         children:
+          - type: CheckBox
+            name: Gweight
+          - type: CheckBox
+            name: Gdirect
+          - type: CheckBox
+            name: Glabels
           - type: ComboBox
             label: Graph layout
             name: Glayout
+          - type: TextBox
+            label: Prune by node degree
+            name: PruneDegree
+            format: number
+            inputPattern: '[0-9]+'
+          - type: TextBox
+            label: Prune by edge weight
+            name: PruneWeight
+            format: number
+            inputPattern: '[0-9]+'
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Node size
+            children:
+             - type: RadioButton
+               name: nsize_deg
+               optionName: nsize
+               optionPart: degree
+             - type: RadioButton
+               name: nsize_hub
+               optionName: nsize
+               optionPart: hubscore
+             - name: nsize_fixed
+               type: RadioButton
+               optionName: nsize
+               optionPart: fixed
   - type: CollapseBox
-    label: Phase Space Parameters
-    collapsed: false
+    label: Recurrence Matrix
+    collapsed: true
     children:
       - type: TextBox
         label: Embedding lag
@@ -135,10 +169,3 @@ children:
       - type: ComboBox
         label: Distance norm
         name: norm
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: Gweight
-      - type: CheckBox
-        name: Gdirect

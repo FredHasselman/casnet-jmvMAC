@@ -2206,6 +2206,7 @@ bandReplace <- function(mat, lower, upper, value = NA, silent=TRUE){
 #' @param order.by If \code{to.ts = TRUE}, pass a vector of the same length as \code{y1} and \code{y2}. It will be used as the time index, if \code{NA} the vector indices will be used to represent time.
 #' @param to.sparse Should sparse matrices be used?
 #' @param method Distance measure to use. Any option that is valid for argument \code{method} of \code{\link[proxy]{dist}}. Type \code{proxy::pr_DB$get_entries()} to se a list of all the options. Common methods are: "Euclidean", "Manhattan", "Minkowski", "Chebysev" (or the same but shorter: "L2","L1","Lp" and "max" distance) (default = \code{"Euclidean"})
+#' @param weighted Creates a matrix with \code{0} for distances greater than \code{emRad} and the distance magnitude for distances that fall within the radius. An atribute \code{weighted = TRUE} will be added to the matrix object (default = \code{FALSE})
 #' @param doPlot Plot the matrix by calling \code{\link{rp_plot}} with defult settings
 #' @param silent Silent-ish mode
 #' @param ... Any paramters to pass to \code{\link{rp_plot}} if \code{doPlot = TRUE}
@@ -2223,6 +2224,7 @@ rp <- function(y1, y2 = NULL,
                order.by = NULL,
                to.sparse = FALSE,
                method = "Euclidean",
+               weighted = FALSE,
                doPlot = FALSE,
                silent = TRUE,
                ...){
@@ -2282,7 +2284,11 @@ rp <- function(y1, y2 = NULL,
 
   if(to.sparse){
     if(!is.null(emRad)){
-      dmat <- di2bi(dmat, emRad = emRad, convMat = TRUE)
+      if(weighted){
+        dmat <- di2we(dmat, emRad = emRad, convMat = TRUE)
+      } else {
+        dmat <- di2bi(dmat, emRad = emRad, convMat = TRUE)
+      }
     }
     attributes(dmat)$emDims1  <- et1
     attributes(dmat)$emDims2  <- et2
@@ -2291,12 +2297,17 @@ rp <- function(y1, y2 = NULL,
     #dmat <- rp_checkfix(dmat, checkAUTO=TRUE, fixAUTO=TRUE)
   } else {
     if(!is.null(emRad)){
-      dmat <- di2bi(dmat, emRad = emRad, convMat = FALSE)
+      if(weighted){
+        dmat <- di2we(dmat, emRad = emRad, convMat = FALSE)
+      } else {
+        dmat <- di2bi(dmat, emRad = emRad, convMat = FALSE)
+      }
     }
     attr(dmat,"emDims1") <- et1
     attr(dmat,"emDims2") <- et2
     attr(dmat,"emDims1.name") <- colnames(y1)
     attr(dmat,"emDims2.name") <- colnames(y2)
+    attr(dmat,"weighted") <- weighted
   }
 
   dmat <- rp_checkfix(dmat, checkAUTO = TRUE, fixAUTO = TRUE)
@@ -2416,6 +2427,7 @@ rp_checkfix <- function(RM, checkS4 = TRUE, checkAUTO = TRUE, checkSPARSE = FALS
 #' @param xlab An x-axis label
 #' @param ylab An y-axis label
 #' @param plotSurrogate Should a 2-panel comparison plot based on surrogate time series be added? If \code{RM} has attributes \code{y1} and \code{y2} containing the time series data (i.e. it was created by a call to \code{\link{rp}}), the following options are available: "RS" (random shuffle), "RP" (randomised phases), "AAFT" (amplitude adjusted fourier transform). If no timeseries data is included, the columns will be shuffled.  NOTE: This is not a surrogate test, just 1 surrogate is created from \code{y1}.
+#' @param weighted If this is a weighted matrix, treat it as an unthresholded matrix (default = \code{FALSE})
 #' @param returnOnlyObject Return the ggplot object only, do not draw the plot (default = \code{TRUE})
 #' @param useGtable Use package \code{\link{gtable}}. If this results in errors (e.g. viewport settings), set set to FALSE to use package \code{patchwork}. This package is in development, see the warning for instructions on how to install it.
 #'
@@ -2424,7 +2436,7 @@ rp_checkfix <- function(RM, checkS4 = TRUE, checkAUTO = TRUE, checkSPARSE = FALS
 #'
 #' @family Distance matrix operations
 #'
-rp_plot <- function(RM, plotDimensions= FALSE, plotMeasures = FALSE, plotRadiusRRbar = TRUE, markEpochsLOI = NULL, markEpochsGrid = NULL, radiusValue = NA, title = "", xlab = "", ylab="", plotSurrogate = NA, returnOnlyObject = FALSE, useGtable = TRUE){
+rp_plot <- function(RM, plotDimensions= FALSE, plotMeasures = FALSE, plotRadiusRRbar = TRUE, markEpochsLOI = NULL, markEpochsGrid = NULL, radiusValue = NA, title = "", xlab = "", ylab="", plotSurrogate = NA, weighted = FALSE, returnOnlyObject = FALSE, useGtable = TRUE){
 
   # # check patchwork
   # if(!length(find.package("patchwork",quiet = TRUE))>0){
@@ -2440,6 +2452,10 @@ rp_plot <- function(RM, plotDimensions= FALSE, plotMeasures = FALSE, plotRadiusR
 
   AUTO <- attr(RM,"AUTO")
 
+  if(is.null(attr(RM,"weighted"))){
+    attr(RM,"weighted") <- weighted
+  }
+
   # prepare data
   if(attr(RM,"package")%00%""%in%"Matrix"){
     RM     <- rp_checkfix(RM, checkTSPARSE = TRUE, fixTSPARSE = TRUE)
@@ -2453,7 +2469,7 @@ rp_plot <- function(RM, plotDimensions= FALSE, plotMeasures = FALSE, plotRadiusR
   }
 
   # check unthresholded
-  if(!all(as.vector(meltRP$value[!is.na(meltRP$value)])==0|as.vector(meltRP$value[!is.na(meltRP$value)])==1)){
+  if(!all(as.vector(meltRP$value[!is.na(meltRP$value)])==0|as.vector(meltRP$value[!is.na(meltRP$value)])==1)|weighted){
     unthresholded <- TRUE
   } else {
     unthresholded <- FALSE
@@ -3708,7 +3724,8 @@ di2bi <- function(distmat, emRad, theiler = 0, convMat = FALSE){
   if(convMat&matPack){RP <- Matrix::as.matrix(RP)}
 
   suppressWarnings(RP <- rp_copy_attributes(source = distmat,  target = RP))
-  attributes(RP)$emRad <- emRad
+  attributes(RP)$emRad    <- emRad
+  attributes(RP)$weighted <- FALSE
 
   return(RP)
 }
@@ -3763,7 +3780,8 @@ di2we <- function(distmat, emRad, convMat = FALSE){
   if(convMat&matPack){RP <- Matrix::as.matrix(RP)}
 
   RP <- rp_copy_attributes(source = distmat,  target = RP)
-  attributes(RP)$emRad <- emRad
+  attributes(RP)$emRad    <- emRad
+  attributes(RP)$weighted <- TRUE
 
   return(RP)
 }
@@ -5123,6 +5141,7 @@ plotNET_prep <- function(g, labels = NA, nodesize = c("degree","hubscore")[1], l
 
   if(igraph::ecount(g)>0){
     if(edgeweight%in%"weight"){
+      igraph::E(g)$weight
       igraph::E(g)$width <- elascer(igraph::E(g)$weight,lo = .8, hi = 5)
     } else {
       if(is.numeric(edgeweight)){
