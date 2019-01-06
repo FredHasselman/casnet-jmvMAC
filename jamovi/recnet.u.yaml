@@ -73,18 +73,18 @@ children:
           - type: Label
             label: Node size
             children:
-             - type: RadioButton
-               name: nsize_deg
-               optionName: nsize
-               optionPart: degree
-             - type: RadioButton
-               name: nsize_hub
-               optionName: nsize
-               optionPart: hubscore
-             - name: nsize_fixed
-               type: RadioButton
-               optionName: nsize
-               optionPart: fixed
+              - type: RadioButton
+                name: nsize_deg
+                optionName: nsize
+                optionPart: degree
+              - type: RadioButton
+                name: nsize_hub
+                optionName: nsize
+                optionPart: hubscore
+              - name: nsize_fixed
+                type: RadioButton
+                optionName: nsize
+                optionPart: fixed
   - type: CollapseBox
     label: Recurrence Matrix
     collapsed: true
@@ -101,10 +101,8 @@ children:
       - type: LayoutBox
         margin: large
         children:
-          - type: RadioButton
-            name: fixed_RAD
-            optionName: fixed
-            optionPart: RAD
+          - type: LayoutBox
+            margin: large
             children:
               - type: TextBox
                 name: fixRAD

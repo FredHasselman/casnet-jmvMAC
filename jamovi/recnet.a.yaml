@@ -106,7 +106,7 @@ options:
       type: List
       default: RAD
       options:
-       - name: RAD
+       - name: RR
          title: "fixed Radius"
        - name: RR
          title: "fixed Recurrence Rate"

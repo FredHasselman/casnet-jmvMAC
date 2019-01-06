@@ -105,7 +105,7 @@ recNetOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 fixed,
                 default="RAD",
                 options=list(
-                    "RAD",
+                    "RR",
                     "RR",
                     "NO"))
             private$..DLmin <- jmvcore::OptionNumber$new(
