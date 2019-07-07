@@ -91,14 +91,12 @@ view.layout = ui.extend({
 					type: DefaultControls.TextBox,
 					label: "Embedding lag",
 					name: "emLag",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				},
 				{
 					type: DefaultControls.TextBox,
 					name: "emDim",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				},
 				{
 					type: DefaultControls.LayoutBox,
@@ -115,7 +113,6 @@ view.layout = ui.extend({
 									name: "fixRAD",
 									label: "Radius",
 									format: FormatDef.number,
-									inputPattern: "[0-9]+",
 									enable: "(fixed_RAD)"
 								}
 							]
@@ -131,7 +128,6 @@ view.layout = ui.extend({
 									name: "fixRR",
 									label: "RR",
 									format: FormatDef.number,
-									inputPattern: "[0-9]+",
 									enable: "(fixed_RR)"
 								}
 							]
@@ -155,50 +151,43 @@ view.layout = ui.extend({
 					type: DefaultControls.TextBox,
 					label: "Minimum diagonal line length",
 					name: "DLmin",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				},
 				{
 					type: DefaultControls.TextBox,
 					label: "Maximum diagonal line length",
 					name: "DLmax",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				},
 				{
 					type: DefaultControls.TextBox,
 					label: "Minimum vertical line length",
 					name: "VLmin",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				},
 				{
 					type: DefaultControls.TextBox,
 					label: "Maximum vertical line length",
 					name: "VLmax",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				},
 				{
 					type: DefaultControls.TextBox,
 					label: "Minimum horizontal line length",
 					name: "HLmin",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				},
 				{
 					type: DefaultControls.TextBox,
 					label: "Maximum horizontal line length",
 					name: "HLmax",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				},
 				{
 					type: DefaultControls.TextBox,
 					label: "Theiler window",
 					name: "theiler",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				},
 				{
 					type: DefaultControls.ComboBox,

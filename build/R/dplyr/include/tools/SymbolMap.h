@@ -3,6 +3,9 @@
 
 #include <tools/hash.h>
 #include <tools/match.h>
+#include <tools/SymbolString.h>
+#include <tools/SymbolVector.h>
+#include <dplyr/symbols.h>
 
 namespace dplyr {
 
@@ -22,29 +25,48 @@ private:
   dplyr_hash_map<SEXP, int> lookup;
   SymbolVector names;
 
+  SymbolMap(const SymbolMap&) ;
+
 public:
   SymbolMap(): lookup(), names() {}
 
-  SymbolMap(const SymbolVector& names_): lookup(), names(names_) {}
-
-  SymbolMapIndex insert(const SymbolString& name) {
-    SymbolMapIndex index = get_index(name);
-    int idx = index.pos;
-    switch (index.origin) {
-    case HASH:
-      break;
-    case RMATCH:
-      lookup.insert(std::make_pair(name.get_sexp(), idx));
-      break;
-    case NEW:
-      names.push_back(name.get_string());
-      lookup.insert(std::make_pair(name.get_sexp(), idx));
-      break;
-    };
-    return index;
+  SymbolMap(int n, const Rcpp::CharacterVector& names_): lookup(n), names((SEXP)names_) {
+    train_lookup();
   }
 
-  SymbolVector get_names() const {
+  SymbolMap(const SymbolVector& names_): lookup(names_.size()), names(names_) {
+    train_lookup();
+  }
+
+  SymbolMap(const Rcpp::DataFrame& tbl):
+    lookup(tbl.size()),
+    names(Rf_getAttrib(tbl, symbols::names))
+  {
+    train_lookup();
+  }
+
+  SymbolMapIndex insert(const SymbolString& name) {
+    // first, lookup the map
+    dplyr_hash_map<SEXP, int>::const_iterator it = lookup.find(name.get_sexp());
+    if (it != lookup.end()) {
+      return SymbolMapIndex(it->second, HASH);
+    }
+
+    int idx = names.match(name);
+    if (idx != NA_INTEGER) {
+      // if it is in the names, insert it in the map with the right index
+      lookup.insert(std::make_pair(name.get_sexp(), idx - 1));
+      return SymbolMapIndex(idx - 1, RMATCH);
+    } else {
+      // otherwise insert it at the back
+      idx = names.size();
+      lookup.insert(std::make_pair(name.get_sexp(), idx));
+      names.push_back(name.get_string());
+      return SymbolMapIndex(idx, NEW);
+    }
+  }
+
+  const SymbolVector& get_names() const {
     return names;
   }
 
@@ -57,39 +79,27 @@ public:
   }
 
   bool has(const SymbolString& name) const {
-    SymbolMapIndex index = get_index(name);
-    return index.origin != NEW;
+    return lookup.find(name.get_sexp()) != lookup.end();
   }
 
-  SymbolMapIndex get_index(const SymbolString& name) const {
-    // first, lookup the map
+  int find(const SymbolString& name) const {
     dplyr_hash_map<SEXP, int>::const_iterator it = lookup.find(name.get_sexp());
-    if (it != lookup.end()) {
-      return SymbolMapIndex(it->second, HASH);
-    }
-
-    int idx = names.match(name);
-    if (idx != NA_INTEGER) {
-      // we have a match
-      return SymbolMapIndex(idx - 1, RMATCH);
-    }
-
-    // no match
-    return SymbolMapIndex(names.size(), NEW);
+    return it == lookup.end() ? -1 : it->second;
   }
 
   int get(const SymbolString& name) const {
-    SymbolMapIndex index = get_index(name);
-    if (index.origin == NEW) {
-      stop("variable '%s' not found", name.get_utf8_cstring());
+    dplyr_hash_map<SEXP, int>::const_iterator it = lookup.find(name.get_sexp());
+    if (it == lookup.end()) {
+      Rcpp::stop("variable '%s' not found", name.get_utf8_cstring());
     }
-    return index.pos;
+    return it->second;
   }
 
   SymbolMapIndex rm(const SymbolString& name) {
-    SymbolMapIndex index = get_index(name);
-    if (index.origin != NEW) {
-      int idx = index.pos;
+
+    dplyr_hash_map<SEXP, int>::const_iterator it = lookup.find(name.get_sexp());
+    if (it != lookup.end()) {
+      int idx = it->second;
       names.remove(idx);
 
       for (dplyr_hash_map<SEXP, int>::iterator it = lookup.begin(); it != lookup.end();) {
@@ -109,10 +119,19 @@ public:
           ++it;
         }
       }
-
+      return SymbolMapIndex(idx, HASH);
     }
 
-    return index;
+    return SymbolMapIndex(names.size(), NEW);
+  }
+
+private:
+
+  void train_lookup() {
+    int n = names.size();
+    for (int i = 0; i < n; i++) {
+      lookup.insert(std::make_pair(names[i].get_sexp(), i));
+    }
   }
 
 };

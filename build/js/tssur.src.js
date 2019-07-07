@@ -57,8 +57,7 @@ view.layout = ui.extend({
 				{
 					type: DefaultControls.TextBox,
 					name: "numSUR",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				}
 			]
 		},

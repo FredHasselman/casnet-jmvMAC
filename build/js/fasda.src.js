@@ -88,7 +88,6 @@ view.layout = ui.extend({
 									name: "polydet_order",
 									label: "Polynomial order",
 									format: FormatDef.number,
-									inputPattern: "[0-9]+",
 									enable: "(removeTrend_polydet)"
 								}
 							]
@@ -106,8 +105,7 @@ view.layout = ui.extend({
 					name: "scaleExclude",
 					label: "Estimates based on at least",
 					suffix: "data points",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				}
 			]
 		}

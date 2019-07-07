@@ -88,7 +88,6 @@ view.layout = ui.extend({
 									name: "poly_order",
 									label: "Polynomial order",
 									format: FormatDef.number,
-									inputPattern: "[0-9]+",
 									enable: "(removeTrend_poly)"
 								}
 							]
@@ -104,7 +103,6 @@ view.layout = ui.extend({
 									name: "max_order",
 									label: "Maximum order",
 									format: FormatDef.number,
-									inputPattern: "[0-9]+",
 									enable: "(removeTrend_adapt)"
 								}
 							]
@@ -139,7 +137,6 @@ view.layout = ui.extend({
 									name: "userMinScale",
 									label: "Maximum bin size: 2^",
 									format: FormatDef.number,
-									inputPattern: "[0-9]+",
 									enable: "(minScale_userMin)"
 								}
 							]
@@ -167,7 +164,6 @@ view.layout = ui.extend({
 									name: "userMaxScale",
 									label: "Maximum bin size: 2^",
 									format: FormatDef.number,
-									inputPattern: "[0-9]+",
 									enable: "(maxScale_userMax)"
 								}
 							]
@@ -187,16 +183,14 @@ view.layout = ui.extend({
 						{
 							type: DefaultControls.TextBox,
 							name: "scaleRES",
-							format: FormatDef.number,
-							inputPattern: "[0-9]+"
+							format: FormatDef.number
 						},
 						{
 							type: DefaultControls.TextBox,
 							name: "scaleExclude",
 							label: "Estimates based on at least",
 							suffix: "data points",
-							format: FormatDef.number,
-							inputPattern: "[0-9]+"
+							format: FormatDef.number
 						}
 					]
 				}

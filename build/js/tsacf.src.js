@@ -63,8 +63,7 @@ view.layout = ui.extend({
 						{
 							type: DefaultControls.TextBox,
 							name: "maxLAG",
-							format: FormatDef.number,
-							inputPattern: "[0-9]+"
+							format: FormatDef.number
 						},
 						{
 							type: DefaultControls.LayoutBox,
@@ -81,8 +80,7 @@ view.layout = ui.extend({
 										{
 											type: DefaultControls.TextBox,
 											name: "siglevel",
-											format: FormatDef.number,
-											inputPattern: "[0-9]+"
+											format: FormatDef.number
 										},
 										{
 											type: DefaultControls.LayoutBox,
@@ -113,14 +111,12 @@ view.layout = ui.extend({
 						{
 							type: DefaultControls.TextBox,
 							name: "rtLAG1",
-							format: FormatDef.number,
-							inputPattern: "[0-9]+"
+							format: FormatDef.number
 						},
 						{
 							type: DefaultControls.TextBox,
 							name: "rtLAG2",
-							format: FormatDef.number,
-							inputPattern: "[0-9]+"
+							format: FormatDef.number
 						}
 					]
 				}

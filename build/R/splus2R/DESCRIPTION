@@ -18,4 +18,4 @@ NeedsCompilation: yes
 Repository: CRAN
 Packaged: 2016-08-30 20:29:23 UTC; spk
 Date/Publication: 2016-09-02 15:17:06
-Built: R 3.3.0; x86_64-apple-darwin13.4.0; 2018-12-14 20:15:09 UTC; unix
+Built: R 3.3.0; x86_64-apple-darwin13.4.0; 2019-07-07 23:00:39 UTC; unix

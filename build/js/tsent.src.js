@@ -47,8 +47,7 @@ view.layout = ui.extend({
 				{
 					type: DefaultControls.TextBox,
 					name: "Ent_edim",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				}
 			]
 		},
@@ -59,8 +58,7 @@ view.layout = ui.extend({
 				{
 					type: DefaultControls.TextBox,
 					name: "Ent_r",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				}
 			]
 		}

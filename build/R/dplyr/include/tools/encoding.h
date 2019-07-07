@@ -41,23 +41,10 @@ struct sxpinfo_struct {
 #define IS_UTF8(x) (reinterpret_cast<sxpinfo_struct*>(x)->gp & UTF8_MASK)
 #endif
 
-// that bit seems unused by R. Just using it to mark
-// objects as Shrinkable Vectors
-// that is useful for things like summarise(list(x)) where x is a
-// variable from the data, because the SEXP that goes into the list
-// is the shrinkable vector, we use this information to duplicate
-// it if needed. See the maybe_copy method in DelayedProcessor
-#define DPLYR_SHRINKABLE_MASK (1<<8)
-
-#define IS_DPLYR_SHRINKABLE_VECTOR(x) (reinterpret_cast<sxpinfo_struct*>(x)->gp & DPLYR_SHRINKABLE_MASK)
-#define SET_DPLYR_SHRINKABLE_VECTOR(x) (reinterpret_cast<sxpinfo_struct*>(x)->gp |= DPLYR_SHRINKABLE_MASK)
-#define UNSET_DPLYR_SHRINKABLE_VECTOR(x) (reinterpret_cast<sxpinfo_struct*>(x)->gp &= (~DPLYR_SHRINKABLE_MASK) )
-
-
 namespace dplyr {
 
-CharacterVector reencode_factor(IntegerVector x);
-CharacterVector reencode_char(SEXP x);
+Rcpp::CharacterVector reencode_factor(Rcpp::IntegerVector x);
+Rcpp::CharacterVector reencode_char(SEXP x);
 
 }
 

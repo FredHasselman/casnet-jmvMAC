@@ -99,8 +99,7 @@ view.layout = ui.extend({
 							type: DefaultControls.TextBox,
 							name: "v1_Nstates",
 							label: "N unique states",
-							format: FormatDef.number,
-							inputPattern: "[0-9]+"
+							format: FormatDef.number
 						}
 					]
 				},
@@ -132,8 +131,7 @@ view.layout = ui.extend({
 							type: DefaultControls.TextBox,
 							name: "v2_Nstates",
 							label: "N unique states",
-							format: FormatDef.number,
-							inputPattern: "[0-9]+"
+							format: FormatDef.number
 						}
 					]
 				},
@@ -160,32 +158,27 @@ view.layout = ui.extend({
 				{
 					type: DefaultControls.TextBox,
 					name: "MinReturns",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				},
 				{
 					type: DefaultControls.TextBox,
 					name: "MaxReturnTime",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				},
 				{
 					type: DefaultControls.TextBox,
 					name: "MaxReturnVisits",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				},
 				{
 					type: DefaultControls.TextBox,
 					name: "MinEventDuration",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				},
 				{
 					type: DefaultControls.TextBox,
 					name: "MinCellDuration",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				}
 			]
 		},
@@ -201,8 +194,7 @@ view.layout = ui.extend({
 				{
 					type: DefaultControls.TextBox,
 					name: "screeCut",
-					format: FormatDef.number,
-					inputPattern: "[0-9]+"
+					format: FormatDef.number
 				}
 			]
 		}

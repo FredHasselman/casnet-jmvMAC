@@ -90,7 +90,6 @@ view.layout = ui.extend({
 									name: "polydet_order",
 									label: "Polynomial order",
 									format: FormatDef.number,
-									inputPattern: "[0-9]+",
 									enable: "(removeTrend_polydet)"
 								}
 							]
@@ -111,8 +110,7 @@ view.layout = ui.extend({
 						{
 							type: DefaultControls.TextBox,
 							name: "fs",
-							format: FormatDef.number,
-							inputPattern: "[0-9]+"
+							format: FormatDef.number
 						},
 						{
 							type: DefaultControls.RadioButton,
@@ -130,7 +128,6 @@ view.layout = ui.extend({
 									type: DefaultControls.TextBox,
 									name: "userNFFT",
 									format: FormatDef.number,
-									inputPattern: "[0-9]+",
 									enable: "(nfft_user)"
 								}
 							]

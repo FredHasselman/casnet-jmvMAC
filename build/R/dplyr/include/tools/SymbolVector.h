@@ -1,6 +1,7 @@
 #ifndef dplyr_tools_SymbolVector_h
 #define dplyr_tools_SymbolVector_h
 
+#include <Rcpp.h>
 #include <tools/SymbolString.h>
 #include <tools/match.h>
 
@@ -8,15 +9,15 @@ namespace dplyr {
 
 class SymbolVector {
 public:
+
   SymbolVector() {}
 
   template <class T>
   explicit SymbolVector(T v_) : v(v_) {}
 
   explicit SymbolVector(SEXP x) : v(init(x)) {}
-  explicit SymbolVector(RObject x) : v(init(x)) {}
+  explicit SymbolVector(Rcpp::RObject x) : v(init(x)) {}
 
-public:
   void push_back(const SymbolString& s) {
     v.push_back(s.get_string());
   }
@@ -38,40 +39,73 @@ public:
   }
 
   int match(const SymbolString& s) const {
-    CharacterVector vs = CharacterVector::create(s.get_string());
-    return as<int>(match(vs));
+    Rcpp::Shield<SEXP> vs(Rf_ScalarString(s.get_sexp()));
+    Rcpp::Shield<SEXP> res(r_match(vs, v));
+    return Rcpp::as<int>(res);
   }
 
-  const IntegerVector match(const CharacterVector& m) const {
-    return r_match(m, v);
-  }
-
-  const IntegerVector match_in_table(const CharacterVector& t) const {
+  SEXP match_in_table(const Rcpp::CharacterVector& t) const {
     return r_match(v, t);
   }
 
-  const CharacterVector get_vector() const {
+  const Rcpp::CharacterVector& get_vector() const {
     return v;
   }
 
 private:
-  CharacterVector v;
-  SEXP init(SEXP x) {
-    if (Rf_isNull(x))
-      return CharacterVector();
-    else
+
+  Rcpp::CharacterVector v;
+
+  SEXP init(SEXP x_) {
+    Rcpp::Shield<SEXP> x(x_);
+    switch (TYPEOF(x)) {
+    case NILSXP:
+      return Rcpp::CharacterVector();
+    case STRSXP:
       return x;
+    case VECSXP:
+    {
+      R_xlen_t n = XLENGTH(x);
+      Rcpp::CharacterVector res(n);
+      for (R_xlen_t i = 0; i < n; i++) {
+        SEXP elt = VECTOR_ELT(x, i);
+        if (TYPEOF(elt) != SYMSXP) {
+          Rcpp::stop("cannot convert to SymbolVector");
+        }
+        res[i] = PRINTNAME(elt);
+      }
+      return res;
+    }
+    default:
+      break;
+    }
+    return x;
   }
 };
 
 }
 
 namespace Rcpp {
-using namespace dplyr;
 
-template <> inline SEXP wrap(const SymbolVector& x) {
+template <> inline SEXP wrap(const dplyr::SymbolVector& x) {
   return x.get_vector();
 }
+
+template <>
+class ConstReferenceInputParameter<dplyr::SymbolVector> {
+public:
+  typedef const dplyr::SymbolVector& const_reference ;
+
+  ConstReferenceInputParameter(SEXP x_) : obj(x_) {}
+
+  inline operator const_reference() {
+    return obj ;
+  }
+
+private:
+  dplyr::SymbolVector obj ;
+} ;
+
 
 }
 
