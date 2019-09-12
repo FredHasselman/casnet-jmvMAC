@@ -537,9 +537,6 @@ ssgBI <- function(
         doWinnowing = doWinnowing,
         screeCut = screeCut)
 
-    results <- ssgBIResults$new(
-        options = options)
-
     analysis <- ssgBIClass$new(
         options = options,
         data = data)

@@ -501,9 +501,6 @@ rqaCR <- function(
         plotDP = plotDP,
         diagWin = diagWin)
 
-    results <- rqaCRResults$new(
-        options = options)
-
     analysis <- rqaCRClass$new(
         options = options,
         data = data)

@@ -1,6 +1,7 @@
 #ifndef dplyr_tools_GroupedDataFrame_H
 #define dplyr_tools_GroupedDataFrame_H
 
+#include <dplyr/registration.h>
 #include <tools/SlicingIndex.h>
 #include <tools/VectorView.h>
 
@@ -8,9 +9,9 @@
 #include <tools/SymbolMap.h>
 #include <tools/bad.h>
 #include <dplyr/symbols.h>
-#include <tools/Quosure.h>
 
 namespace dplyr {
+
 class GroupedDataFrame;
 
 class GroupedDataFrameIndexIterator {
@@ -23,19 +24,16 @@ public:
 
   int i;
   const GroupedDataFrame& gdf;
-  Rcpp::ListView indices;
+  ListView indices;
 };
 
 class GroupedDataFrame {
-private:
-  GroupedDataFrame(const GroupedDataFrame&);
-
 public:
   typedef GroupedDataFrameIndexIterator group_iterator;
   typedef GroupedSlicingIndex slicing_index;
 
-  GroupedDataFrame(Rcpp::DataFrame x);
-  GroupedDataFrame(Rcpp::DataFrame x, const GroupedDataFrame& model);
+  GroupedDataFrame(DataFrame x);
+  GroupedDataFrame(DataFrame x, const GroupedDataFrame& model);
 
   group_iterator group_begin() const {
     return GroupedDataFrameIndexIterator(*this);
@@ -45,10 +43,10 @@ public:
     return symbols.get_name(i);
   }
 
-  Rcpp::DataFrame& data() {
+  DataFrame& data() {
     return data_;
   }
-  const Rcpp::DataFrame& data() const {
+  const DataFrame& data() const {
     return data_;
   }
 
@@ -80,64 +78,45 @@ public:
     return groups[groups.size() - 1] ;
   }
 
-  inline const SymbolVector& get_vars() const {
+  inline SymbolVector get_vars() const {
     return symbols.get_names();
   }
 
-  inline const Rcpp::DataFrame& group_data() const {
+  inline const DataFrame& group_data() const {
     return groups;
   }
 
   template <typename Data>
-  static void set_groups(Data& x, SEXP groups) {
-    Rf_setAttrib(x, symbols::groups, groups);
+  static void strip_groups(Data& x) {
+    x.attr("groups") = R_NilValue;
   }
 
   template <typename Data>
-  static void strip_groups(Data& x) {
-    set_groups(x, R_NilValue);
+  static void set_groups(Data& x, SEXP groups) {
+    x.attr("groups") = groups;
   }
 
   template <typename Data1, typename Data2>
   static void copy_groups(Data1& x, const Data2& y) {
-    copy_attrib(x, y, symbols::groups);
+    x.attr("groups") = y.attr("groups");
   }
 
-  static inline Rcpp::CharacterVector classes() {
-    static Rcpp::CharacterVector classes = Rcpp::CharacterVector::create("grouped_df", "tbl_df", "tbl", "data.frame");
-    return classes;
+  static inline CharacterVector classes() {
+    return Rcpp::CharacterVector::create("grouped_df", "tbl_df", "tbl", "data.frame");
   }
 
   bool drops() const {
     SEXP drop_attr = Rf_getAttrib(groups, symbols::dot_drop);
-    return Rf_isNull(drop_attr) || (Rcpp::is<bool>(drop_attr) && LOGICAL(drop_attr)[0] != FALSE);
-  }
-
-  inline R_xlen_t max_group_size() const {
-    R_xlen_t res = 0;
-    SEXP rows = indices();
-    R_xlen_t ng = XLENGTH(rows);
-    for (R_xlen_t i = 0; i < ng; i++) {
-      res = std::max(XLENGTH(VECTOR_ELT(rows, i)), res);
-    }
-    return res;
-  }
-
-  void check_not_groups(const QuosureList& quosures) const {
-    int n = quosures.size();
-    for (int i = 0; i < n; i++) {
-      if (has_group(quosures[i].name()))
-        bad_col(quosures[i].name(), "can't be modified because it's a grouping variable");
-    }
+    return Rf_isNull(drop_attr) || (is<bool>(drop_attr) && LOGICAL(drop_attr)[0] != FALSE);
   }
 
 private:
 
   SymbolVector group_vars() const ;
 
-  Rcpp::DataFrame data_;
+  DataFrame data_;
   SymbolMap symbols;
-  Rcpp::DataFrame groups;
+  DataFrame groups;
   int nvars_;
 
 };
@@ -157,27 +136,12 @@ inline GroupedSlicingIndex GroupedDataFrameIndexIterator::operator*() const {
 }
 
 namespace Rcpp {
+using namespace dplyr;
 
 template <>
-inline bool is<dplyr::GroupedDataFrame>(SEXP x) {
+inline bool is<GroupedDataFrame>(SEXP x) {
   return Rf_inherits(x, "grouped_df");
 }
-
-template <>
-class ConstReferenceInputParameter<dplyr::GroupedDataFrame> {
-public:
-  typedef const dplyr::GroupedDataFrame& const_reference ;
-
-  ConstReferenceInputParameter(SEXP x_) : df(x_), obj(df) {}
-
-  inline operator const_reference() {
-    return obj ;
-  }
-
-private:
-  DataFrame df;
-  dplyr::GroupedDataFrame obj ;
-} ;
 
 }
 

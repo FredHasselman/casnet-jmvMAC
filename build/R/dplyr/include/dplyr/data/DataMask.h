@@ -27,8 +27,6 @@ template <class SlicedTibble> class DataMaskWeakProxy;
 template <typename SlicedTibble>
 struct ColumnBinding {
 private:
-  typedef typename SlicedTibble::slicing_index Index;
-
   // is this a summary binding, i.e. does it come from summarise
   bool summary;
 
@@ -50,7 +48,7 @@ public:
   // the active binding function calls eventually calls DataMask<>::materialize
   // which calls this method
   inline SEXP get(
-    const Index& indices,
+    const typename SlicedTibble::slicing_index& indices,
     SEXP mask_resolved)
   {
     return materialize(indices, mask_resolved);
@@ -83,7 +81,7 @@ public:
   // this is only used for its side effect of storing the result
   // in the right environment
   inline void update_indices(
-    const Index& indices,
+    const typename SlicedTibble::slicing_index& indices,
     SEXP mask_resolved)
   {
     materialize(indices, mask_resolved);
@@ -98,25 +96,23 @@ public:
     int pos,
     boost::shared_ptr< DataMaskProxy<SlicedTibble> >& data_mask_proxy
   ) {
-    static Rcpp::Function make_active_binding_fun(
+    static Function make_active_binding_fun(
       ".make_active_binding_fun",
       Rcpp::Environment::namespace_env("dplyr")
     );
 
     // external pointer to the weak proxy of the data mask
     // eventually this calls back to the reak DataMask
-    Rcpp::XPtr< DataMaskWeakProxy<SlicedTibble> > weak_proxy(
+    XPtr< DataMaskWeakProxy<SlicedTibble> > weak_proxy(
       new DataMaskWeakProxy<SlicedTibble>(data_mask_proxy)
     );
-
-    Rcpp::Shield<SEXP> fun(make_active_binding_fun(pos, weak_proxy));
 
     R_MakeActiveBinding(
       // the name of the binding
       symbol,
 
       // the function
-      fun,
+      make_active_binding_fun(pos, weak_proxy),
 
       // where to set it up as an active binding
       mask_active
@@ -132,7 +128,7 @@ public:
   // this is a fairly expensive callback to R, but it only happens
   // when we use the syntax <column> = NULL
   inline void detach(SEXP mask_active, SEXP mask_resolved) {
-    Rcpp::Language("rm", symbol, Rcpp::_["envir"] = mask_active).eval(R_BaseEnv);
+    Language("rm", symbol, _["envir"] = mask_active).eval(R_BaseEnv);
   }
 
 private:
@@ -146,15 +142,14 @@ private:
     SEXP frame = ENCLOS(ENCLOS(mask_resolved));
 
     // materialize
-    Rcpp::Shield<SEXP> value(summary ?
-                             column_subset(data, Index(indices.group()), frame) :
-                             column_subset(data, indices, frame)
-                            );
+    Shield<SEXP> value(summary ?
+                       column_subset(data, RowwiseSlicingIndex(indices.group()), frame) :
+                       column_subset(data, indices, frame)
+                      );
     MARK_NOT_MUTABLE(value);
 
     // store it in the mask_resolved environment
     Rf_defineVar(symbol, value, mask_resolved);
-
     return value;
   }
 
@@ -229,7 +224,7 @@ public:
   // remove the binding in the mask_active environment
   // so that standard evaluation does not find it
   inline void detach(SEXP mask_active, SEXP mask_resolved) {
-    Rcpp::Language("rm", symbol, Rcpp::_["envir"] = mask_active).eval();
+    Language("rm", symbol, _["envir"] = mask_active).eval();
   }
 
 private:
@@ -285,21 +280,12 @@ public:
   {}
 
   virtual SEXP materialize(int idx) {
-    int nprot = 0;
-    SEXP res = R_NilValue;
-    {
-      boost::shared_ptr< DataMaskProxy<SlicedTibble> > lock(real.lock());
-      if (lock) {
-        res = PROTECT(lock.get()->materialize(idx));
-        ++nprot;
-      }
+    if (boost::shared_ptr< DataMaskProxy<SlicedTibble> > lock = real.lock()) {
+      return lock.get()->materialize(idx);
+    } else {
+      warning("Hybrid callback proxy out of scope");
+      return R_NilValue;
     }
-    if (nprot == 0) {
-      Rcpp::warning("Hybrid callback proxy out of scope");
-    }
-
-    UNPROTECT(nprot);
-    return res;
   }
 };
 
@@ -351,12 +337,12 @@ public:
   // - delays setting up the environment until needed
   DataMask(const SlicedTibble& gdf) :
     column_bindings(),
-    symbol_map(gdf.data()),
+    symbol_map(gdf.data().size(), gdf.data().names()),
     active_bindings_ready(false),
     proxy(new DataMaskProxy<SlicedTibble>(this))
   {
-    const Rcpp::DataFrame& data = gdf.data();
-    Rcpp::Shield<SEXP> names(Rf_getAttrib(data, symbols::names));
+    const DataFrame& data = gdf.data();
+    CharacterVector names = data.names();
     int n = data.size();
     LOG_INFO << "processing " << n << " vars: " << names;
 
@@ -365,7 +351,7 @@ public:
     for (int i = 0; i < n; i++) {
       column_bindings.push_back(
         ColumnBinding<SlicedTibble>(
-          false, SymbolString(STRING_ELT(names, i)).get_symbol(),
+          false, SymbolString(names[i]).get_symbol(),
           data[i]
         )
       );
@@ -393,15 +379,6 @@ public:
     } else {
       return 0;
     }
-  }
-
-  const ColumnBinding<SlicedTibble>*
-  get_subset_binding(int position) const {
-    const ColumnBinding<SlicedTibble>& res = column_bindings[position];
-    if (res.is_null()) {
-      return 0;
-    }
-    return &res;
   }
 
   // remove this variable from the environments
@@ -439,12 +416,10 @@ public:
   // as we might not need them at all
   void setup() {
     if (!active_bindings_ready) {
-      Rcpp::Shelter<SEXP> shelter;
-
       // the active bindings have not been used at all
       // so setup the environments ...
-      mask_active = shelter(child_env(R_EmptyEnv));
-      mask_resolved = shelter(child_env(mask_active));
+      mask_active = child_env(R_EmptyEnv);
+      mask_resolved = child_env(mask_active);
 
       // ... and install the bindings
       for (size_t i = 0; i < column_bindings.size(); i++) {
@@ -460,21 +435,19 @@ public:
       // top       : the environment containing active bindings.
       //
       // data_mask : where .data etc ... are installed
-      data_mask = shelter(rlang::new_data_mask(mask_resolved, mask_active));
+      data_mask = rlang::new_data_mask(
+                    mask_resolved, // bottom
+                    mask_active    // top
+                  );
 
       // install the pronoun
-      Rf_defineVar(symbols::dot_data, shelter(rlang::as_data_pronoun(data_mask)), data_mask);
+      Rf_defineVar(symbols::dot_data, rlang::as_data_pronoun(data_mask), data_mask);
 
       active_bindings_ready = true;
     } else {
       clear_resolved();
     }
   }
-
-  SEXP get_data_mask() const {
-    return data_mask;
-  }
-
 
   // get ready to evaluate an R expression for a given group
   // as identified by the indices
@@ -507,6 +480,7 @@ public:
   //
   //  materialize_binding is defined in utils-bindings.cpp as:
   //
+  // // [[Rcpp::export]]
   // SEXP materialize_binding(
   //   int idx,
   //   XPtr<DataMaskWeakProxyBase> mask_proxy_xp)
@@ -523,6 +497,7 @@ public:
                  get_current_indices(), mask_resolved
                );
 
+
     // remember to pro-actievely materialize this binding on the next group
     materialized.push_back(idx);
 
@@ -530,6 +505,8 @@ public:
   }
 
   SEXP eval(const Quosure& quo, const slicing_index& indices) {
+    setup();
+
     // update the bindings
     update(indices);
 
@@ -537,9 +514,15 @@ public:
     get_context_env()["..group_size"] = indices.size();
     get_context_env()["..group_number"] = indices.group() + 1;
 
+    SEXP expr = quo.expr();
+    if (TYPEOF(expr) == LANGSXP && Rf_inherits(CAR(expr), "rlang_lambda_function")) {
+      // FIXME: Mutation
+      SET_CLOENV(CAR(expr), mask_resolved) ;
+    }
+
 #if (R_VERSION < R_Version(3, 5, 0))
-    Rcpp::Shield<SEXP> call_quote(Rf_lang2(fns::quote, quo));
-    Rcpp::Shield<SEXP> call_eval_tidy(Rf_lang3(rlang_eval_tidy(), quo, data_mask));
+    Shield<SEXP> call_quote(Rf_lang2(fns::quote, quo));
+    Shield<SEXP> call_eval_tidy(Rf_lang3(rlang_eval_tidy(), quo, data_mask));
 
     return Rcpp::Rcpp_fast_eval(call_eval_tidy, R_BaseEnv);
 #else
@@ -566,9 +549,9 @@ private:
   SymbolMap symbol_map;
 
   // The 3 environments of the data mask
-  Rcpp::Environment mask_active;  // where the active bindings live
-  Rcpp::Environment mask_resolved; // where the resolved active bindings live
-  Rcpp::Environment data_mask; // actual data mask, contains the .data pronoun
+  Environment mask_active;  // where the active bindings live
+  Environment mask_resolved; // where the resolved active bindings live
+  Environment data_mask; // actual data mask, contains the .data pronoun
 
   // are the active bindings ready ?
   bool active_bindings_ready;
@@ -577,8 +560,8 @@ private:
   const slicing_index* current_indices;
 
   // previous values for group_number and group_size
-  Rcpp::RObject previous_group_size;
-  Rcpp::RObject previous_group_number;
+  RObject previous_group_size;
+  RObject previous_group_number;
 
   boost::shared_ptr< DataMaskProxy<SlicedTibble> > proxy;
 
@@ -641,7 +624,7 @@ private:
   }
 
   static SEXP rlang_eval_tidy() {
-    static Rcpp::Language call("::", symbols::rlang, symbols::eval_tidy);
+    static Language call("::", symbols::rlang, symbols::eval_tidy);
     return call;
   }
 

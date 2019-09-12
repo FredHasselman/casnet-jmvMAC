@@ -163,9 +163,6 @@ tsENT <- function(
         Ent_edim = Ent_edim,
         Ent_r = Ent_r)
 
-    results <- tsENTResults$new(
-        options = options)
-
     analysis <- tsENTClass$new(
         options = options,
         data = data)

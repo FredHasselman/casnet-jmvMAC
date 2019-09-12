@@ -8,11 +8,11 @@
 #include <dplyr/visitors/join/JoinVisitor.h>
 #include <dplyr/visitors/join/Column.h>
 
-#include <dplyr/symbols.h>
-
 namespace dplyr {
 
 JoinVisitor* join_visitor(const Column& left, const Column& right, bool warn, bool accept_na_match = true);
+
+CharacterVector get_uniques(const CharacterVector& left, const CharacterVector& right);
 
 void check_attribute_compatibility(const Column& left, const Column& right);
 
@@ -21,9 +21,9 @@ class DualVector {
 public:
   enum { RTYPE = (LHS_RTYPE > RHS_RTYPE ? LHS_RTYPE : RHS_RTYPE) };
 
-  typedef Rcpp::Vector<LHS_RTYPE> LHS_Vec;
-  typedef Rcpp::Vector<RHS_RTYPE> RHS_Vec;
-  typedef Rcpp::Vector<RTYPE> Vec;
+  typedef Vector<LHS_RTYPE> LHS_Vec;
+  typedef Vector<RHS_RTYPE> RHS_Vec;
+  typedef Vector<RTYPE> Vec;
 
   typedef typename Rcpp::traits::storage_type<LHS_RTYPE>::type LHS_STORAGE;
   typedef typename Rcpp::traits::storage_type<RHS_RTYPE>::type RHS_STORAGE;
@@ -33,12 +33,12 @@ public:
   DualVector(LHS_Vec left_, RHS_Vec right_) : left(left_), right(right_) {}
 
   LHS_STORAGE get_left_value(const int i) const {
-    if (i < 0) Rcpp::stop("get_left_value() called with negative argument");
+    if (i < 0) stop("get_left_value() called with negative argument");
     return left[i];
   }
 
   RHS_STORAGE get_right_value(const int i) const {
-    if (i >= 0) Rcpp::stop("get_right_value() called with nonnegative argument");
+    if (i >= 0) stop("get_right_value() called with nonnegative argument");
     return right[-i - 1];
   }
 
@@ -81,7 +81,7 @@ public:
   template <class iterator>
   SEXP subset(iterator it, const int n) {
     // We use the fact that LGLSXP < INTSXP < REALSXP, this defines our coercion precedence
-    Rcpp::RObject ret;
+    RObject ret;
     if (LHS_RTYPE == RHS_RTYPE)
       ret = subset_same(it, n);
     else if (LHS_RTYPE > RHS_RTYPE)
@@ -95,7 +95,7 @@ public:
 
   template <class iterator>
   SEXP subset_same(iterator it, const int n) {
-    Vec res(Rcpp::no_init(n));
+    Vec res(no_init(n));
     for (int i = 0; i < n; i++, ++it) {
       res[i] = get_value(*it);
     }
@@ -104,7 +104,7 @@ public:
 
   template <class iterator>
   SEXP subset_left(iterator it, const int n) {
-    LHS_Vec res(Rcpp::no_init(n));
+    LHS_Vec res(no_init(n));
     for (int i = 0; i < n; i++, ++it) {
       res[i] = get_value_as_left(*it);
     }
@@ -113,7 +113,7 @@ public:
 
   template <class iterator>
   SEXP subset_right(iterator it, const int n) {
-    RHS_Vec res(Rcpp::no_init(n));
+    RHS_Vec res(no_init(n));
     for (int i = 0; i < n; i++, ++it) {
       res[i] = get_value_as_right(*it);
     }
@@ -187,22 +187,22 @@ public:
     Parent(left, right, false),
     tzone(R_NilValue)
   {
-    Rcpp::Shield<SEXP> tzone_left(Rf_getAttrib(left.get_data(), symbols::tzone));
-    Rcpp::Shield<SEXP> tzone_right(Rf_getAttrib(right.get_data(), symbols::tzone));
+    RObject tzone_left  = left.get_data().attr("tzone");
+    RObject tzone_right = right.get_data().attr("tzone");
+    if (tzone_left.isNULL() && tzone_right.isNULL()) return;
 
-    bool null_left = Rf_isNull(tzone_left);
-    bool null_right = Rf_isNull(tzone_right);
-    if (null_left && null_right) return;
-
-    if (null_left) {
+    if (tzone_left.isNULL()) {
       tzone = tzone_right;
-    } else if (null_right) {
+    } else if (tzone_right.isNULL()) {
       tzone = tzone_left;
     } else {
-      if (STRING_ELT(tzone_left, 0) == STRING_ELT(tzone_right, 0)) {
-        tzone = tzone_left;
+      std::string s_left  = as<std::string>(tzone_left);
+      std::string s_right = as<std::string>(tzone_right);
+
+      if (s_left == s_right) {
+        tzone = wrap(s_left);
       } else {
-        tzone = Rf_mkString("UTC");
+        tzone = wrap("UTC");
       }
     }
   }
@@ -215,17 +215,16 @@ public:
   }
 
 private:
-
-  inline SEXP promote(Rcpp::NumericVector x) {
-    Rf_classgets(x, get_time_classes());
+  inline SEXP promote(NumericVector x) {
+    set_class(x, Rcpp::CharacterVector::create("POSIXct", "POSIXt"));
     if (!tzone.isNULL()) {
-      Rf_setAttrib(x, symbols::tzone, tzone);
+      x.attr("tzone") = tzone;
     }
     return x;
   }
 
 private:
-  Rcpp::RObject tzone;
+  RObject tzone;
 };
 
 class DateJoinVisitorGetter {
@@ -252,7 +251,7 @@ public:
 
 private:
   static SEXP promote(SEXP x) {
-    Rf_classgets(x, get_date_classes());
+    set_class(x, "Date");
     return x;
   }
 

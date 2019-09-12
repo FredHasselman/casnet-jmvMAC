@@ -20,21 +20,17 @@ public:
 // It is used in grouped operations (group_by()).
 class GroupedSlicingIndex : public SlicingIndex {
 public:
-  GroupedSlicingIndex(): data(), group_index(-1), preserved(true) {
+  GroupedSlicingIndex(): data(), group_index(-1) {
     R_PreserveObject(data);
   }
 
   ~GroupedSlicingIndex() {
-    if (preserved) {
+    if (group_index == -1) {
       R_ReleaseObject(data);
     }
   }
 
-  GroupedSlicingIndex(SEXP data_, int group_) : data(data_), group_index(group_), preserved(false) {}
-
-  GroupedSlicingIndex(int group_) : data(Rf_ScalarInteger(group_ + 1)), group_index(group_), preserved(true) {
-    R_PreserveObject(data);
-  }
+  GroupedSlicingIndex(SEXP data_, int group_) : data(data_), group_index(group_) {}
 
   virtual int size() const {
     return data.size();
@@ -61,7 +57,6 @@ private:
   Rcpp::IntegerVectorView data;
 
   int group_index;
-  bool preserved;
 };
 
 // A RowwiseSlicingIndex selects a single row, which is also the group ID by definition.

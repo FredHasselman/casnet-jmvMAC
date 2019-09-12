@@ -127,9 +127,6 @@ tsLVL <- function(
         alt = alt,
         varEq = varEq)
 
-    results <- tsLVLResults$new(
-        options = options)
-
     analysis <- tsLVLClass$new(
         options = options,
         data = data)

@@ -254,9 +254,6 @@ faPSD <- function(
         nfft = nfft,
         userNFFT = userNFFT)
 
-    results <- faPSDResults$new(
-        options = options)
-
     analysis <- faPSDClass$new(
         options = options,
         data = data)

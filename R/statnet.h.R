@@ -127,9 +127,6 @@ statNet <- function(
         alt = alt,
         varEq = varEq)
 
-    results <- statNetResults$new(
-        options = options)
-
     analysis <- statNetClass$new(
         options = options,
         data = data)

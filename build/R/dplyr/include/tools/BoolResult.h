@@ -2,20 +2,18 @@
 #define dplyr_tools_BoolResult_H
 
 #include <tools/utils.h>
-#include <dplyr/symbols.h>
 
 namespace dplyr {
 
 class BoolResult {
 public:
   BoolResult(bool result_) : result(result_) {}
-  BoolResult(bool result_, const Rcpp::CharacterVector& msg) : result(result_), message(msg) {}
+  BoolResult(bool result_, const CharacterVector& msg) : result(result_), message(msg) {}
 
   inline operator SEXP() const {
-    Rcpp::LogicalVector res = Rcpp::LogicalVector::create(result);
-    Rf_setAttrib(res, symbols::comment, message);
-    Rcpp::Shield<SEXP> klass(Rf_mkString("BoolResult"));
-    Rf_classgets(res, klass);
+    LogicalVector res = LogicalVector::create(result);
+    res.attr("comment") = message;
+    set_class(res, "BoolResult");
     return res;
   }
 
@@ -42,12 +40,10 @@ public:
 
 private:
   bool result;
-  Rcpp::CharacterVector message;
-
-
+  CharacterVector message;
 };
 
-inline BoolResult no_because(const Rcpp::CharacterVector& msg) {
+inline BoolResult no_because(const CharacterVector& msg) {
   return BoolResult(false, msg);
 }
 

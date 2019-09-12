@@ -18,6 +18,7 @@ public:
   explicit SymbolVector(SEXP x) : v(init(x)) {}
   explicit SymbolVector(Rcpp::RObject x) : v(init(x)) {}
 
+public:
   void push_back(const SymbolString& s) {
     v.push_back(s.get_string());
   }
@@ -39,12 +40,15 @@ public:
   }
 
   int match(const SymbolString& s) const {
-    Rcpp::Shield<SEXP> vs(Rf_ScalarString(s.get_sexp()));
-    Rcpp::Shield<SEXP> res(r_match(vs, v));
-    return Rcpp::as<int>(res);
+    Rcpp::CharacterVector vs = Rcpp::CharacterVector::create(s.get_string());
+    return Rcpp::as<int>(match(vs));
   }
 
-  SEXP match_in_table(const Rcpp::CharacterVector& t) const {
+  const Rcpp::IntegerVector match(const Rcpp::CharacterVector& m) const {
+    return r_match(m, v);
+  }
+
+  const Rcpp::IntegerVector match_in_table(const Rcpp::CharacterVector& t) const {
     return r_match(v, t);
   }
 
@@ -53,11 +57,9 @@ public:
   }
 
 private:
-
   Rcpp::CharacterVector v;
 
-  SEXP init(SEXP x_) {
-    Rcpp::Shield<SEXP> x(x_);
+  SEXP init(SEXP x) {
     switch (TYPEOF(x)) {
     case NILSXP:
       return Rcpp::CharacterVector();
@@ -86,26 +88,11 @@ private:
 }
 
 namespace Rcpp {
+using namespace dplyr;
 
-template <> inline SEXP wrap(const dplyr::SymbolVector& x) {
+template <> inline SEXP wrap(const SymbolVector& x) {
   return x.get_vector();
 }
-
-template <>
-class ConstReferenceInputParameter<dplyr::SymbolVector> {
-public:
-  typedef const dplyr::SymbolVector& const_reference ;
-
-  ConstReferenceInputParameter(SEXP x_) : obj(x_) {}
-
-  inline operator const_reference() {
-    return obj ;
-  }
-
-private:
-  dplyr::SymbolVector obj ;
-} ;
-
 
 }
 

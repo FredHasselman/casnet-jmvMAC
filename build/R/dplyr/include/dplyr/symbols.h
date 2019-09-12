@@ -46,7 +46,6 @@ struct symbols {
   static SEXP comment;
   static SEXP groups;
   static SEXP vars;
-  static SEXP position;
 
   static SEXP op_minus;
   static SEXP str;
@@ -61,16 +60,6 @@ struct symbols {
   static SEXP dot_drop;
   static SEXP warn_deprecated;
   static SEXP signal_soft_deprecated;
-  static SEXP call;
-  static SEXP env;
-  static SEXP fun;
-  static SEXP cpp_class;
-  static SEXP levels;
-  static SEXP labels;
-  static SEXP indices;
-  static SEXP ptype;
-  static SEXP names;
-  static SEXP formula;
 };
 
 struct fns {
@@ -81,10 +70,6 @@ struct strings {
   static SEXP POSIXct;
   static SEXP POSIXt;
   static SEXP Date;
-};
-
-struct vectors {
-  static SEXP factor;
 };
 
 } // namespace dplyr

@@ -13,4 +13,5 @@ Packaged: 2019-03-04 17:57:49 UTC; william
 Author: William Constantine [cre, aut]
 Maintainer: William Constantine <wlbconstan@gmail.com>
 Date/Publication: 2019-03-04 22:00:03 UTC
-Built: R 3.3.0; x86_64-apple-darwin13.4.0; 2019-07-08 03:07:26 UTC; unix
+Built: R 3.4.4; x86_64-w64-mingw32; 2019-04-25 18:03:31 UTC; windows
+Archs: i386, x64

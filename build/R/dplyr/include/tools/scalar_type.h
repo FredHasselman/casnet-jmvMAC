@@ -12,7 +12,7 @@ struct scalar_type {
 
 template <>
 struct scalar_type<STRSXP> {
-  typedef Rcpp::String type;
+  typedef String type;
 };
 
 }

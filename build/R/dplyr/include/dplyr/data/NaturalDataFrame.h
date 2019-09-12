@@ -1,11 +1,11 @@
 #ifndef dplyr_tools_NaturalDataFrame_H
 #define dplyr_tools_NaturalDataFrame_H
 
+#include <dplyr/registration.h>
 #include <tools/SlicingIndex.h>
 
 #include <tools/SymbolVector.h>
 #include <tools/bad.h>
-#include <tools/Quosure.h>
 
 namespace dplyr {
 
@@ -47,10 +47,10 @@ public:
     return SymbolString() ;
   }
 
-  Rcpp::DataFrame& data() {
+  DataFrame& data() {
     return data_;
   }
-  const Rcpp::DataFrame& data() const {
+  const DataFrame& data() const {
     return data_;
   }
 
@@ -81,24 +81,18 @@ public:
     return data_[i];
   }
 
-  inline const SymbolVector& get_vars() const {
-    return vars;
+  inline SymbolVector get_vars() const {
+    return SymbolVector();
   }
 
-  static inline Rcpp::CharacterVector classes() {
-    static Rcpp::CharacterVector classes = Rcpp::CharacterVector::create("tbl_df", "tbl", "data.frame");
-    return classes;
+  static inline CharacterVector classes() {
+    return Rcpp::CharacterVector::create("tbl_df", "tbl", "data.frame");
   }
-
-  inline R_xlen_t max_group_size() const {
-    return nrows();
-  }
-
-  void check_not_groups(const QuosureList& quosures) const {}
 
 private:
-  Rcpp::DataFrame data_;
-  SymbolVector vars;
+
+  DataFrame data_;
+
 };
 
 }
