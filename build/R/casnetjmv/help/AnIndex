@@ -1,9 +1,7 @@
-%++%	grapes-plus-plus-grapes
-%+-%	grapes-plus-grapes
-%00%	grapes-00-grapes
 %>%	pipe
 add_alpha	add_alpha
 as.numeric_character	as.numeric_character
+as.numeric_discrete	as.numeric_discrete
 as.numeric_factor	as.numeric_factor
 bandReplace	bandReplace
 crqa_cl	crqa_cl
@@ -37,7 +35,6 @@ gg_plotHolder	gg_plotHolder
 gg_theme	gg_theme
 growth_ac	growth_ac
 growth_ac_cond	growth_ac_cond
-is.wholenumber	is.wholenumber
 MFDFA	MFDFA
 mif	mif
 mif_interlayer	mif_interlayer
@@ -45,6 +42,7 @@ mi_mat	mi_mat
 monoH	monoH
 newZ	newZ
 pacf_fisherZ	pacf_fisherZ
+plotFD_loglog	plotFD_loglog
 plotNET_BA	plotNET_BA
 plotNET_groupColour	plotNET_groupColour
 plotNET_groupWeight	plotNET_groupWeight
@@ -54,7 +52,6 @@ plotRED_acf	plotRED_acf
 plotRED_mif	plotRED_mif
 plotSUR_hist	plotSUR_hist
 recNet	recNet
-repmat	repmat
 roc_noise	roc_noise
 rp	rp
 rp_checkfix	rp_checkfix

@@ -105,12 +105,12 @@ view.layout = ui.extend({
 				},
 				{
 					type: DefaultControls.Label,
-					label: "Provide state labels seperated by comma's (optional)",
+					label: "Provide unobserved state labels seperated by comma's (optional)",
 					controls: [
 						{
 							type: DefaultControls.TextBox,
 							name: "v1_labels",
-							label: "State labels",
+							label: "Unobserved state labels",
 							format: FormatDef.string,
 							width: "largest"
 						}
@@ -137,12 +137,12 @@ view.layout = ui.extend({
 				},
 				{
 					type: DefaultControls.Label,
-					label: "Provide state labels seperated by comma's (optional)",
+					label: "Provide unobserved state labels seperated by comma's (optional)",
 					controls: [
 						{
 							type: DefaultControls.TextBox,
 							name: "v2_labels",
-							label: "State labels",
+							label: "Unobserved state labels",
 							format: FormatDef.string,
 							width: "largest"
 						}

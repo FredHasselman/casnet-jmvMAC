@@ -1,12 +1,12 @@
 ---
 title: CASNET
 name: casnetjmv
-version: 0.0.5
+version: 0.0.6
 jms: '1.0'
 authors:
   - Fred Hasselman
 maintainer: Fred Hasselman <f.hasselman@bsi.ru.nl>
-date: '2018-01-01'
+date: '2019-08-01'
 type: R
 description: >-
   A collection of analytic tools for studying (multivariate) signals recorded
