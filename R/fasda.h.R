@@ -304,9 +304,6 @@ faSDA <- function(
         scaleRES = scaleRES,
         scaleExclude = scaleExclude)
 
-    results <- faSDAResults$new(
-        options = options)
-
     analysis <- faSDAClass$new(
         options = options,
         data = data)

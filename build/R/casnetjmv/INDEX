@@ -47,6 +47,7 @@ plotRED_acf             Plot ACF and PACF
 plotRED_mif             Plot various MI functions
 plotSUR_hist            Surrogate Test
 recNet                  Recurrence Networks
+repmat                  Repeat Copies of a Matrix
 rp                      Create a Distance Matrix
 rp_copy_attributes      Copy Matrix Attributes
 rp_lineDist             Line length distributions
@@ -79,6 +80,7 @@ ts_detrend              Detrend a time series
 ts_diff                 Derivative of time series
 ts_discrete             Discrete representation
 ts_duration             Time series to Duration series
+ts_durationJMV          Time series to Duration series
 ts_embed                Delay embedding of a time series
 ts_integrate            Create a timeseries profile
 ts_levels               Detect levels in time series

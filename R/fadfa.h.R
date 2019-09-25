@@ -315,9 +315,6 @@ faDFA <- function(
         scaleRES = scaleRES,
         scaleExclude = scaleExclude)
 
-    results <- faDFAResults$new(
-        options = options)
-
     analysis <- faDFAClass$new(
         options = options,
         data = data)

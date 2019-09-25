@@ -263,9 +263,6 @@ tsTST <- function(
         csu = csu,
         csdu = csdu)
 
-    results <- tsTSTResults$new(
-        options = options)
-
     analysis <- tsTSTClass$new(
         options = options,
         data = data)

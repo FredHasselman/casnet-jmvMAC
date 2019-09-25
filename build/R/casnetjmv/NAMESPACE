@@ -90,6 +90,7 @@ export(ts_detrend)
 export(ts_diff)
 export(ts_discrete)
 export(ts_duration)
+export(ts_durationJMV)
 export(ts_embed)
 export(ts_integrate)
 export(ts_levels)
@@ -107,58 +108,44 @@ importFrom(magrittr,"%>%")
 importFrom(stats,rmultinom)
 importFrom(stats,runif)
 
-export(tsTST)
 export(tsTSTClass)
 export(tsTSTOptions)
 
-export(tsACF)
 export(tsACFClass)
 export(tsACFOptions)
 
-export(tsENT)
 export(tsENTClass)
 export(tsENTOptions)
 
-export(faDFA)
 export(faDFAClass)
 export(faDFAOptions)
 
-export(faSDA)
 export(faSDAClass)
 export(faSDAOptions)
 
-export(faPSD)
 export(faPSDClass)
 export(faPSDOptions)
 
-export(ssgUNI)
 export(ssgUNIClass)
 export(ssgUNIOptions)
 
-export(ssgBI)
 export(ssgBIClass)
 export(ssgBIOptions)
 
-export(rqaAU)
 export(rqaAUClass)
 export(rqaAUOptions)
 
-export(rqaCR)
 export(rqaCRClass)
 export(rqaCROptions)
 
-export(recNet)
 export(recNetClass)
 export(recNetOptions)
 
-export(statNet)
 export(statNetClass)
 export(statNetOptions)
 
-export(tsSUR)
 export(tsSURClass)
 export(tsSUROptions)
 
-export(tsLVL)
 export(tsLVLClass)
 export(tsLVLOptions)

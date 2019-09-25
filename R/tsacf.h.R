@@ -263,9 +263,6 @@ tsACF <- function(
         rtLAG1 = rtLAG1,
         rtLAG2 = rtLAG2)
 
-    results <- tsACFResults$new(
-        options = options)
-
     analysis <- tsACFClass$new(
         options = options,
         data = data)

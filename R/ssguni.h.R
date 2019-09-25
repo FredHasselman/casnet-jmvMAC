@@ -326,9 +326,6 @@ ssgUNI <- function(
         MinEventDuration = MinEventDuration,
         MinCellDuration = MinCellDuration)
 
-    results <- ssgUNIResults$new(
-        options = options)
-
     analysis <- ssgUNIClass$new(
         options = options,
         data = data)

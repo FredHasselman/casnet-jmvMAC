@@ -157,9 +157,6 @@ tsSUR <- function(
         Save = Save,
         savePath = savePath)
 
-    results <- tsSURResults$new(
-        options = options)
-
     analysis <- tsSURClass$new(
         options = options,
         data = data)

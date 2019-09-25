@@ -6518,14 +6518,15 @@ ts_discrete <- function(y, nbins=ceiling(2*NROW(y)^(1/3)), keepNA = TRUE){
 #' @export
 #'
 #' @examples
-ts_duration <- function(y, timeVec = stats::time(y),fs = stats::frequency(y), tolerance = 0){
+ts_durationJMV <- function(y, timeVec = stats::time(y),fs = stats::frequency(y), tolerance = 0){
   tID <- seq_along(y)[-1]
 
   same <- list()
   same[[1]] <- data.frame(y=y[1],
                           ind.start = 1,
                           ind.end   = 1,
-                          t.start = timeVec[1], t.end = timeVec[1],
+                          t.start = timeVec[1],
+                          t.end = timeVec[1],
                           duration.time = 0,
                           duration.samples = 1,
                           duration.fs = fs,
@@ -6561,6 +6562,121 @@ ts_duration <- function(y, timeVec = stats::time(y),fs = stats::frequency(y), to
   same.out$duration.time = timeVec[same.out$ind.end+1] - timeVec[same.out$ind.start] #laply(seq_along(same.out$ind.start) function(i){(same.out$t.end[same.out$ind.end] - same.out$t.start[same.out$ind.start])}
   row.names(same.out) <- paste(seq_along(same.out$t.start))
   same.out$trajectory.id <- seq_along(same.out$t.start)
+  return(same.out)
+}
+
+
+
+#' Time series to Duration series
+#'
+#' @param y A time series, numeric vector, or categorical variable.
+#' @param timeVec A vector, same length as `y` containing timestamps, or, sample indices.
+#' @param fs Optional sampling frequency if timeVec represents sample indices. An extra column `duration.fs` will be added which represents `1/fs * duration in samples`
+#' @param tolerance A number `tol` indicating a range `[y-tol,y+tol]` to consider the same value. Useful when `y` is continuous (`default = 0`)
+#'
+#' @return A data frame
+#' @export
+#'
+#' @family Time series operations
+#'
+#' @examples
+#' library(invctr)
+#' # Create data with events and their timecodes
+#' coder <- data.frame(beh=c("stare","stare","coffee","type","type","stare"),t=c(0,5,10,15,20,25))
+#'
+#' ts_duration(y = coder$beh, timeVec = coder$t)
+#'
+ts_duration <- function(y, timeVec = stats::time(y), fs = stats::frequency(y), tolerance = 0){
+
+
+  if(plyr::is.discrete(y)){
+    y.n <- as.numeric_discrete(y,sortUnique = TRUE)
+  } else {
+    y.n <- as.numeric(y)
+    names(y.n) <- paste(y.n)
+    if(all(is.na(y.n))){
+      stop("Conversion to numeric failed for all elements of y.")
+    }
+  }
+
+  y <- y.n
+  tID <- seq_along(y)[-1]
+  y[NROW(y)+1]       <- max(y, na.rm = TRUE) + tolerance + 1
+  timeVec[NROW(timeVec)+1] <- max(timeVec, na.rm = TRUE)
+
+  same <- list()
+  same[[1]] <- data.frame(y = y[1],
+                          y.name  = names(y)[1],
+                          ind.start = 1,
+                          ind.end   = 1,
+                          t.start = timeVec[1],
+                          t.end   = timeVec[1],
+                          duration.time    = 0,
+                          duration.samples = 1,
+                          duration.fs      = fs,
+                          keep = TRUE)
+
+  for(i in tID){
+    # Same as previous?
+    if(y[i]%[]%c((y[i-1]-tolerance),(y[i-1]+tolerance))){
+      same[[i]] <- data.frame(y = y[i],
+                              y.name  = names(y[i]),
+                              ind.start = same[[i-1]]$ind.start,
+                              ind.end   = i,
+                              t.start = same[[i-1]]$t.start,
+                              t.end   = timeVec[i],
+                              duration.time    = 0,
+                              duration.samples = (same[[i-1]]$duration.samples+1),
+                              duration.fs      = fs,
+                              keep = TRUE)
+      same[[i-1]]$keep <- FALSE
+    } else {
+      same[[i-1]]$t.end <- timeVec[i]
+      # Same as upcoming?
+      if((y[i]%[]%c((y[i+1]-tolerance),(y[i+1]+tolerance)))){
+        same[[i]] <- data.frame(y = y[i],
+                                y.name  = names(y[i]),
+                                ind.start = i,
+                                ind.end   = (i+1),
+                                t.start = timeVec[i],
+                                t.end   = timeVec[i+1],
+                                duration.time    = 0,
+                                duration.samples = 1,
+                                duration.fs = fs,
+                                keep = FALSE)
+      }
+
+      if(i == max(tID)){
+        same[[i]] <- data.frame(y = y[i],
+                                y.name  = names(y[i]),
+                                ind.start = i,
+                                ind.end   = i,
+                                t.start = timeVec[i],
+                                t.end   = timeVec[i],
+                                duration.time    = 0,
+                                duration.samples = 1,
+                                duration.fs = fs,
+                                keep = TRUE)
+      } else {
+
+        same[[i]] <- data.frame(y = y[i],
+                                y.name  = names(y[i]),
+                                ind.start = i,
+                                ind.end   = (i+1),
+                                t.start = timeVec[i],
+                                t.end   = timeVec[i+1],
+                                duration.time    = 0,
+                                duration.samples = 1,
+                                duration.fs = fs,
+                                keep = TRUE)
+      }
+    }
+  }
+  same.out <- plyr::ldply(same)
+  same.out <- same.out[same.out$keep,1:8]
+  if(!is.null(fs)){same.out$duration.fs = (1/fs)*same.out$duration.samples}
+  same.out$duration.time = (same.out$t.end - same.out$t.start)
+  row.names(same.out) <- paste(seq_along(same.out$t.start))
   return(same.out)
 }
 
@@ -7782,6 +7898,7 @@ try_CATCH <- function(expr){
 #' Converts a factor with numeric levels to a numeric vector, using the values of the levels.
 #'
 #' @param x A factor based on numeric values.
+#' @param sortUnique Should the unique character values be sorted? (default = `FALSE`)
 #' @param keepNA Keep NA values (`TRUE`), or remove them (default = `FALSE`)
 #'
 #' @return A numeric vector with factor levels as names.
@@ -7798,7 +7915,7 @@ try_CATCH <- function(expr){
 #' as.numeric_factor(f, keepNA = TRUE)
 #'
 #'
-as.numeric_factor <- function(x, keepNA = FALSE){
+as.numeric_factor <- function(x, keepNA = FALSE, sortUnique = FALSE){
   idNA <- is.na(x)
   if(!is.factor(x)){stop("Not a factor, use: `as.numeric_character()`")}
   out <- try(as.numeric(levels(x))[x])
@@ -7811,6 +7928,7 @@ as.numeric_factor <- function(x, keepNA = FALSE){
   names(out) <- as.character(out)
   return(out)
 }
+
 
 
 #' Character vector to named numeric vector
@@ -7846,159 +7964,144 @@ as.numeric_character <- function(x, sortUnique = FALSE, keepNA = FALSE){
 }
 
 
+
 #' Discrete (factor or character) to numeric vector
 #'
-#' Converts a factor with numeric levels, or, a character vector with numeric values to a named numeric vector (using [as.numeric_factor], or, [as.numeric_character]). If the character values or factor levels are non-numeric (or mixed), a named numeric vector will be returned, values represent an unordered categorical variable (nominal), the character values are used as names. If an unnamed numeric vector is passed, it will be returned as a named numeric vector, with the values copied as names. If a continuous numeric vector is passed, a named numeric vector of bins will be returned (using [ts_discrete]), with original vaslues as names.
+#' Converts a factor with numeric levels, or, a character vector with numeric values to a numeric vector using [as.numeric_factor], or, [as.numeric_character] respectively. If an unnamed numeric vector is passed, it will be returned as a named numeric vector.
 #'
-#' @param x A factor, a character, or, numeric vector
+#' @param x A factor with levels that are numeric, or, a character vector representing numbers.
 #' @param keepNA Keep NA values (`TRUE`), or remove them (default = `FALSE`)
-#' @param sortUnique In case of character values/character factor levels, should the unique values be sorted before they are assigned a number? (default = `FALSE`)
-#' @param nbins Number of bins to use if the vector is continuous. See [ts_discrete] (default = `ceiling(2*NROW(x)^(1/3))`)
+#' @param sortUnique Should the unique character/factor level values be sorted? (default = `FALSE`)
 #'
 #' @return A numeric vector with factor levels / numeric character values as names.
 #' @export
 #'
 #' @examples
 #'
-#' f <- factor(round(runif(10,0,9)))
-#' as.numeric_factor(f)
+#' # Continuous
+#' i <- runif(10,0,9)
+#' as.numeric_discrete(i)
 #'
-#' # Add NAs
+#' # Integer
+#' as.numeric_discrete(round(i))
+#'
+#' # Factor with NAs
 #' f <- factor(c(round(runif(9,0,9)),NA))
-#' as.numeric_factor(f)
-#' as.numeric_factor(f, keepNA = TRUE)
+#' as.numeric_discrete(f)
+#' as.numeric_discrete(f, keepNA = FALSE)
+#'
+#' # Character vector
+#' c <- c("Thank","you", "for", "the flowers")
+#' as.numeric_discrete(c)
+#' as.numeric_discrete(c, sortUnique = TRUE)
+#'
+#' c <- c("Thank","you", "for", "the", "flowers")
+#' as.numeric_discrete(c)
+#' as.numeric_discrete(c, sortUnique = TRUE)
 #'
 #'
-#'
-as.numeric_discrete <- function(x, keepNA = FALSE, sortUnique = FALSE, nbins = ceiling(2*NROW(x)^(1/3))){
-
-  NAs <- sum(is.na(x%00%NA))
-  if(!keepNA&NAs>0){
-    x <- x[!is.na(x)]
-  }
+as.numeric_discrete <- function(x, keepNA = FALSE, sortUnique = FALSE){
 
   if(plyr::is.discrete(x)){
     if(is.factor(x)){
-      if(suppressWarnings(sum(is.na(as.numeric(levels(x))))==NAs)){
-        y <- as.numeric_factor(x, keepNA = keepNA)
-        #all(is.na(as.numeric(levels(x)))))){
-      } else {
+      if(suppressWarnings(all(is.na(as.numeric(levels(x)))))){
         x <- as.character(x)
-      }
-      }
-    if(is.character(x)){
-      if(suppressWarnings(sum(is.na(as.numeric(x)))==NAs)){
-        x <- as.numeric(x)
       } else {
-        if(!sortUnique){
-          warning("sortUnique was set to TRUE. Vector contains a mix of letters and numbers.")
-          sortUnique <- TRUE
-        }
+        y <- as.numeric_factor(x, keepNA = keepNA, sortUnique = sortUnique)
+      }
     }
+    if(is.character(x)){
       y <- as.numeric_character(x, keepNA = keepNA, sortUnique = sortUnique)
     }
-  }
-
-  if(is.numeric(x)){
-    if(all(invctr::is.wholenumber(x))){
-      y <- x #as.factor(factor(x, ordered = sortUnique))
-    } else {
-      y <- ts_discrete(x, keepNA = keepNA, nbins = nbins)
+  } else {
+    if(is.numeric(x)){
+      if(!all(is.wholenumber(x))){
+        y <- ts_discrete(x)
+        if(is.null(names(y))){
+          names(y) <- paste(signif(x,4))
+        }
+      } else { # wholenumber
+        y <- x
+        if(is.null(names(y))){
+          names(y) <- paste(x)
+        }
+      }
+    } else { # numeric
+      stop("Variable is not a factor, character vector, or, unnamed numeric vector.")
     }
-    if(is.null(names(y))){
-      names(y) <- paste(signif(x,3))
-    }
-  }
-
+  } # discrete
   return(y)
 }
 
-
-
-#'
-#' #' Signed increment
-#' #'
-#' #' Increment an integer counter by an arbitrary (signed) interval.
-#' #'
-#' #' @param counter If \code{counter} and \code{increment} are both a (signed) integers \code{counter} will change by the value of \code{increment}.
-#' #' @param increment An integer value \eqn{\neq 0} to add to \code{counter}
-#' #'
-#' #' @export
-#' #' @author Fred Hasselman
-#' #' @examples
-#' #'
-#' #' # Notice the difference between passing an object and a value for counter
-#' #'
-#' #' # Value
-#' #' (10 %+-% -5)
-#' #' (10 %+-% -5)
-#' #'
-#' #' # Object
-#' #' i <- 10
-#' #' (i %+-% -5)
-#' #' (i %+-% -5)
-#' #'
-#' #' # This means we can use the infix in a while ... statement
-#' #' while(i > -3) i %+-% -5
-#' #' # WARNING: As is the case for any while ... statement, be careful not to create an infinite loop!
-#' #'
-#' `%+-%` <- function(counter, increment){
-#'   if(is.na(counter%00%NA)|is.na(increment%00%NA)|!is.wholenumber(counter)|!is.wholenumber(increment)|increment==0){
-#'     stop("Don't know how to work with counter and/or increment argument.\n Did you use integers?")
-#'   } else{
-#'     result <- counter + increment
-#'     if(counter>0&result<=0){warning("Positive valued counter changed sign (counter <= 0)!")}
-#'     if(counter<0&result>=0){warning("Negative valued counter changed sign (counter >= 0)!")}
-#'     obj <- try_CATCH(as.numeric(deparse(substitute(counter))))
-#'     if(is.na(obj$value)){
-#'       eval(parse(text=paste(deparse(substitute(counter))," <<- result")))
-#'     } else {
-#'       return(result)
-#'     }
-#'   }
-#' }
-#'
-#'
-#' #' Positive increment
-#' #'
-#' #' Increment a counter by an arbitrary interval greater than 0.
-#' #'
-#' #' @param counter If \code{counter} \eqn{\ge 0} and \code{increment} \eqn{> 0} and are both integers, \code{counter} will change by the value of \code{increment}.
-#' #' @param increment An integer value \eqn{> 0} to add to \code{counter}
-#' #'
-#' #' @export
-#' #' @author Fred Hasselman
-#' #' @description When your functions wear these rose tinted glasses, the world will appear to be a nicer, fluffier place.
-#' #' @examples
-#' #'
-#' #' # Notice the difference between passing an object and a value for counter
-#' #'
-#' #' # Value
-#' #' (0 %++% 5)
-#' #' (0 %++% 5)
-#' #'
-#' #' # Object
-#' #' i <- 0
-#' #' (i %+-% 5)
-#' #' (i %+-% 5)
-#' #'
-#' #' # This means we can use the infix in a while ... statement
-#' #' while(i < 20) i %+-% 5
-#' #' # WARNING: As is the case for any while ... statement, be careful not to create an infinite loop!
-#' #'
-#' `%++%` <- function(counter,increment){
-#'   if(is.na(counter%00%NA)|is.na(increment%00%NA)|!is.wholenumber(counter)|!is.wholenumber(increment)|increment<=0|counter<0){
-#'     stop("Don't know how to work with counter and/or increment argument.\n Did you use integers?")
-#'   } else{
-#'     result <- counter + increment
-#'     obj <- try_CATCH(as.numeric(deparse(substitute(counter))))
-#'     if(is.na(obj$value)){
-#'       eval(parse(text=paste(deparse(substitute(counter))," <<- result")))
-#'     } else {
-#'       return(result)
-#'     }
-#'   }
-#' }
+#
+# #' Discrete (factor or character) to numeric vector
+# #'
+# #' Converts a factor with numeric levels, or, a character vector with numeric values to a named numeric vector (using [as.numeric_factor], or, [as.numeric_character]). If the character values or factor levels are non-numeric (or mixed), a named numeric vector will be returned, values represent an unordered categorical variable (nominal), the character values are used as names. If an unnamed numeric vector is passed, it will be returned as a named numeric vector, with the values copied as names. If a continuous numeric vector is passed, a named numeric vector of bins will be returned (using [ts_discrete]), with original vaslues as names.
+# #'
+# #' @param x A factor, a character, or, numeric vector
+# #' @param keepNA Keep NA values (`TRUE`), or remove them (default = `FALSE`)
+# #' @param sortUnique In case of character values/character factor levels, should the unique values be sorted before they are assigned a number? (default = `FALSE`)
+# #' @param nbins Number of bins to use if the vector is continuous. See [ts_discrete] (default = `ceiling(2*NROW(x)^(1/3))`)
+# #'
+# #' @return A numeric vector with factor levels / numeric character values as names.
+# #' @export
+# #'
+# #' @examples
+# #'
+# #' f <- factor(round(runif(10,0,9)))
+# #' as.numeric_factor(f)
+# #'
+# #' # Add NAs
+# #' f <- factor(c(round(runif(9,0,9)),NA))
+# #' as.numeric_factor(f)
+# #' as.numeric_factor(f, keepNA = TRUE)
+# #'
+# #'
+# #'
+# as.numeric_discrete <- function(x, keepNA = FALSE, sortUnique = FALSE, nbins = ceiling(2*NROW(x)^(1/3))){
+#
+#   NAs <- sum(is.na(x%00%NA))
+#   if(!keepNA&NAs>0){
+#     x <- x[!is.na(x)]
+#   }
+#
+#   if(plyr::is.discrete(x)){
+#     x[which(sapply(as.character(x), nchar)==0)] <- NA_character_
+#     if(is.factor(x)){
+#       if(suppressWarnings(sum(is.na(as.numeric(levels(x))))==NAs)){
+#         y <- as.numeric_factor(x, keepNA = keepNA)
+#        #all(is.na(as.numeric(levels(x)))))){
+#       } else {
+#         x <- as.character(x)
+#       }
+#       }
+#     if(is.character(x)){
+#       if(suppressWarnings(sum(is.na(as.numeric(x)))==NAs)){
+#         x <- as.numeric(x)
+#       } else {
+#         if(!sortUnique){
+#           warning("sortUnique was set to TRUE. Vector contains a mix of letters and numbers.")
+#           sortUnique <- TRUE
+#         }
+#     }
+#       y <- as.numeric_character(x, keepNA = keepNA, sortUnique = sortUnique)
+#     }
+#   }
+#
+#   if(is.numeric(x)){
+#     if(all(invctr::is.wholenumber(x))){
+#       y <- x #as.factor(factor(x, ordered = sortUnique))
+#     } else {
+#       y <- ts_discrete(x, keepNA = keepNA, nbins = nbins)
+#     }
+#     if(is.null(names(y))){
+#       names(y) <- paste(signif(x,3))
+#     }
+#   }
+#
+#   return(y)
+# }
+#
 
 
 #' Repeat Copies of a Matrix

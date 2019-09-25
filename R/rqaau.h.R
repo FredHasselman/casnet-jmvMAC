@@ -485,9 +485,6 @@ rqaAU <- function(
         plotDP = plotDP,
         diagWin = diagWin)
 
-    results <- rqaAUResults$new(
-        options = options)
-
     analysis <- rqaAUClass$new(
         options = options,
         data = data)

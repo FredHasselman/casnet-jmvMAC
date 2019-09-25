@@ -438,9 +438,6 @@ recNet <- function(
         theiler = theiler,
         norm = norm)
 
-    results <- recNetResults$new(
-        options = options)
-
     analysis <- recNetClass$new(
         options = options,
         data = data)

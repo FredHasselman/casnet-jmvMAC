@@ -346,6 +346,12 @@ ssgBIResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 rows=0,
                 columns=list(
                     list(
+                        `name`="TRAJid", 
+                        `title`="Trajectory ID"),
+                    list(
+                        `name`="WAVid", 
+                        `title`="Wave ID"),
+                    list(
                         `name`="stateName", 
                         `title`="State"),
                     list(
@@ -536,9 +542,6 @@ ssgBI <- function(
         MinCellDuration = MinCellDuration,
         doWinnowing = doWinnowing,
         screeCut = screeCut)
-
-    results <- ssgBIResults$new(
-        options = options)
 
     analysis <- ssgBIClass$new(
         options = options,

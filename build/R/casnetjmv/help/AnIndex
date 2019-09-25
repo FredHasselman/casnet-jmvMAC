@@ -52,6 +52,7 @@ plotRED_acf	plotRED_acf
 plotRED_mif	plotRED_mif
 plotSUR_hist	plotSUR_hist
 recNet	recNet
+repmat	repmat
 roc_noise	roc_noise
 rp	rp
 rp_checkfix	rp_checkfix
@@ -87,6 +88,7 @@ ts_detrend	ts_detrend
 ts_diff	ts_diff
 ts_discrete	ts_discrete
 ts_duration	ts_duration
+ts_durationJMV	ts_durationJMV
 ts_embed	ts_embed
 ts_integrate	ts_integrate
 ts_levels	ts_levels
