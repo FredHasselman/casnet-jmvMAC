@@ -10,4 +10,6 @@
 
 #include <plogr.h>
 
+using namespace Rcpp;
+
 #endif // #ifndef dplyr_dplyr_main_H

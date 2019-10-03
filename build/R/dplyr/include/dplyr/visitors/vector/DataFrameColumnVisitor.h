@@ -7,7 +7,7 @@ namespace dplyr {
 
 class DataFrameColumnVisitor : public VectorVisitor {
 public:
-  DataFrameColumnVisitor(const Rcpp::DataFrame& data_) : data(data_), visitors(data) {}
+  DataFrameColumnVisitor(const DataFrame& data_) : data(data_), visitors(data) {}
 
   inline size_t hash(int i) const {
     return visitors.hash(i);
@@ -38,7 +38,7 @@ public:
   }
 
 private:
-  Rcpp::DataFrame data;
+  DataFrame data;
   DataFrameVisitors visitors;
 };
 

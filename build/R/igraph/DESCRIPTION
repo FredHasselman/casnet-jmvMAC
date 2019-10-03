@@ -37,4 +37,5 @@ NeedsCompilation: yes
 Packaged: 2019-04-21 07:44:54 UTC; ripley
 Repository: CRAN
 Date/Publication: 2019-04-22 06:57:32 UTC
-Built: R 3.3.0; x86_64-apple-darwin13.4.0; 2019-07-08 03:08:21 UTC; unix
+Built: R 3.4.4; i386-w64-mingw32; 2019-04-25 20:11:18 UTC; windows
+Archs: i386, x64
