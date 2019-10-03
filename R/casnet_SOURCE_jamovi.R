@@ -1668,7 +1668,7 @@ crqa_diagPofile <- function(RM,
   x2<-(which.max(as.numeric(paste(dp$Diagonal))))
 
   B
-  B_long <- B %>% as_tibble() %>% gather(key = "diagonal", value = "rec")
+  B_long <- B %>% tibble::as_tibble() %>% gather(key = "diagonal", value = "rec")
 
   dpdense <- density(dp$RR,n = 21)
   round(seq(1,21,length.out=512))
@@ -2562,7 +2562,7 @@ rp_plot <- function(RM, plotDimensions= FALSE, plotMeasures = FALSE, plotRadiusR
       if(length(resol)>100){
         resol <- round(seq(0,max(RM,na.rm = TRUE),length.out=100),2)
       }
-      resol <- resol %>% tibble::as.tibble() %>% dplyr::mutate(y= seq(exp(0),exp(1),length.out=NROW(resol)), x=0.5)
+      resol <- resol %>% tibble::as_tibble() %>% dplyr::mutate(y= seq(exp(0),exp(1),length.out=NROW(resol)), x=0.5)
       #resol <- resol[-1,]
 
       distrange <- plyr::ldply(c(0.001, 0.005, 0.01, 0.05, 0.1, 0.5), function(t){
@@ -3905,7 +3905,7 @@ ssg_gwf2long <- function(gwf_name, delta_t = 0.01,returnOnlyData = TRUE, saveLon
   var_list <- as.list(gwf_lines[var_list_b:var_list_e])
   varinfo <-   plyr::ldply(var_list, function(li){
     tmp <- strsplit(li,"\t")[[1]]
-    dat<- tibble::as.tibble(data.frame(var.name = tmp[3],
+    dat<- tibble::as_tibble(data.frame(var.name = tmp[3],
                                        var.role = tmp[1],
                                        var.type = tmp[2]))
     if(dat$var.type%in%"integer"|dat$var.role%in%"state"){
@@ -3922,13 +3922,13 @@ ssg_gwf2long <- function(gwf_name, delta_t = 0.01,returnOnlyData = TRUE, saveLon
     }
     Evals <- length(tmp)-Bvals
     Nvals <- length(tmp[Bvals:(Bvals+Evals)])
-    dat2 <- tibble::as.tibble(matrix(NA,ncol=MaxCols-NCOL(dat), dimnames = list(NULL,paste0("value",1:(MaxCols-NCOL(dat))))))
+    dat2 <- tibble::as_tibble(matrix(NA,ncol=MaxCols-NCOL(dat), dimnames = list(NULL,paste0("value",1:(MaxCols-NCOL(dat))))))
     if(length(tmp)>3){
       dat2[1,1:Nvals] <- tmp[Bvals:(Bvals+Evals)]
     }
     return(cbind.data.frame(dat,dat2))
   })
-  varinfo <- tibble::as.tibble(varinfo)
+  varinfo <- tibble::as_tibble(varinfo)
 
   conf_list_b <- which(grepl("MinReturns", gwf_lines, fixed = TRUE))
   conf_list_e <- which(grepl("</Config>", gwf_lines, fixed = TRUE))-1

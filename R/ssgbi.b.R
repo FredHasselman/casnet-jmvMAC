@@ -49,6 +49,9 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         v2_discretised <- "yes"
       }
 
+      v1 <- as.numeric_discrete(data[[y1]], sortUnique = TRUE)
+      v2 <- as.numeric_discrete(data[[y2]], sortUnique = TRUE)
+
       # Variable 1 ----
       v1 <- as.numeric_discrete(data[[y1]], sortUnique = TRUE)
 
@@ -222,7 +225,6 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           wave_ID  <- unique(data[[waves]])
         }
 
-
         SSG_traj <- list()
         cnt <- 0
         for(traj in traj_ID){
@@ -294,7 +296,6 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         } # wav
 
         names(SSG_traj) <- levels(interaction(traj_ID,wave_ID))
-
 
         dur_data <- plyr::ldply(SSG_traj, function(ssgl){data.frame(ssgl$durations, stringsAsFactors = FALSE)})
         dur_data$Trajectory <- factor(dur_data$Trajectory)
@@ -430,11 +431,11 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           wav_vec <- data[[self$options$waves]]
         }
 
-        # if(is.null(self$options$time)){
-        #   tvec <- seq_along(NROW(data))
-        # } else {
-        #   tvec <- data[[self$options$time]]
-        # }
+        if(is.null(self$options$time)){
+          tvec <- seq_along(v1)
+        } else {
+          tvec <- data[[self$options$time]]
+        }
 
         tsData <- data.frame(t  = tvec,
                              y1 = v1,

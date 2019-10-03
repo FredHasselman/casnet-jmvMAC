@@ -1,7 +1,3 @@
-%++%                    Non-negative increment
-%+-%                    Signed increment
-%00%                    Rose tinted infix
-%e%                     Is element of... with multiple input types
 MFDFA                   Multi-fractal Detrended Fluctuation Analysis
 add_alpha               Add transparency to a colour
 as.numeric_character    Character vector to named numeric vector
@@ -21,8 +17,6 @@ dist_hamming            Calculate Hamming distance
 elascer                 Elastic Scaler - A Flexible Rescale Function
 est_emDim               Estimate number of embedding dimensions
 est_emLag               Estimate embedding lag (tau)
-extractors              Extract vectors by index
-fINDexers               Find row or column by name or index
 faDFA                   Detrended Fluctuation Analysis
 faPSD                   Power Spectral Density Slope
 faSDA                   Standardised Dispersion Analysis
@@ -38,13 +32,10 @@ gg_theme                gg_theme
 growth_ac               Examples of dynamical growth models (maps)
 growth_ac_cond          Examples of conditional dynamical growth models
                         (maps)
-insiders                Inside interval
 mi_mat                  Mutual Information variations
 mif                     Mutual Information Function
 mif_interlayer          Inter-layer mutual information
-outsiders               Outside interval
 pacf_fisherZ            FisherZ for PACF
-padders                 Padd vector by index
 plotFD_loglog           Plot output from fluctuation analyses based on
                         log-log regression
 plotNET_BA              Example of Barabasi scale-free network
@@ -56,7 +47,6 @@ plotRED_acf             Plot ACF and PACF
 plotRED_mif             Plot various MI functions
 plotSUR_hist            Surrogate Test
 recNet                  Recurrence Networks
-regressors              Regress vectors
 repmat                  Repeat Copies of a Matrix
 rp                      Create a Distance Matrix
 rp_copy_attributes      Copy Matrix Attributes
@@ -76,7 +66,6 @@ ssg_gwf2long            Import GrdWare files
 ssg_winnowing           ssg_winnowing
 statNet                 Static Networks
 symbolize               Convert numeric vectors to symbolic vectors.
-trimmers                Trim vector by index
 tsACF                   Linear Temporal Correlations
 tsENT                   Entropy & Roughness
 tsLVL                   Detect levels & peaks
