@@ -25,5 +25,4 @@ Author: Jim Hester [aut, cre]
 Maintainer: Jim Hester <james.f.hester@gmail.com>
 Repository: CRAN
 Date/Publication: 2019-03-12 22:30:02 UTC
-Built: R 3.4.4; x86_64-w64-mingw32; 2019-04-25 17:56:39 UTC; windows
-Archs: i386, x64
+Built: R 3.3.0; x86_64-apple-darwin13.4.0; 2019-09-25 05:36:58 UTC; unix

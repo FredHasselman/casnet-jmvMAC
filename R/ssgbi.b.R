@@ -179,8 +179,8 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ssg$loc <- paste0("[",ssg[,3],",",ssg[,4],"]")
         ssg$value <- NA
 
-        for(i in ssg$`COORD.variable 1`){
-          ssg$value[ssg$`COORD.variable 1`==i] <-  i:(i+max(ssg$`COORD.variable 2`)-1)%%2
+        for(i in ssg[,3]){
+          ssg$value[ssg[,3]==i] <-  i:(i+max(ssg[,4])-1)%%2
         }
         ssg$value <- factor(ssg$value)
 
@@ -430,11 +430,11 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           wav_vec <- data[[self$options$waves]]
         }
 
-        if(is.null(self$options$time)){
-          tvec <- seq_along(NROW(data))
-        } else {
-          tvec <- data[[self$options$time]]
-        }
+        # if(is.null(self$options$time)){
+        #   tvec <- seq_along(NROW(data))
+        # } else {
+        #   tvec <- data[[self$options$time]]
+        # }
 
         tsData <- data.frame(t  = tvec,
                              y1 = v1,
