@@ -150,11 +150,5 @@ export(rqaCROptions)
 export(recNetClass)
 export(recNetOptions)
 
-export(statNetClass)
-export(statNetOptions)
-
 export(tsSURClass)
 export(tsSUROptions)
-
-export(tsLVLClass)
-export(tsLVLOptions)

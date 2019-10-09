@@ -4243,7 +4243,7 @@ rn <- function(y1, y2 = NULL,
       #     dmat[edgeFrame$to[r],edgeFrame$from[r]] <- 1/edgeFrame$rectime[r]
       #     }
       #   }
-      tmp <- as_adjacency_matrix(grW, type = "both", sparse = to.sparse, attr = "weight")
+      tmp <- igraph::as_adjacency_matrix(grW, type = "both", sparse = to.sparse, attr = "weight")
       #tmp <- bandReplace(tmp,0,0,0)
       dmat <- rp_copy_attributes(source = dmat, target = tmp)
       rm(tmp)
@@ -4321,13 +4321,11 @@ rn_plot <- function(RN,
                     plotSurrogate = NA,
                     returnOnlyObject = FALSE){
 
+  # JAMOVI VERSION
   rp_plot(RM = RN,
           plotDimensions  = plotDimensions,
           plotMeasures    = plotMeasures,
-          plotRadiusRRbar = FALSE,
-          drawGrid = drawGrid,
           markEpochsLOI = markEpochsLOI,
-          Chromatic = Chromatic,
           radiusValue = radiusValue,
           title = title, xlab = xlab, ylab = ylab,
           plotSurrogate = plotSurrogate,
@@ -5130,6 +5128,9 @@ make_spiral_graph <- function(g,
 
   g$layout <- layout_as_spiral(g, type = type, arcs = arcs, a = a, b = b, rev = rev)
 
+#
+#   tbreaks <- c(1,igraph::vcount(g))
+#   tlabels <- paste0(tbreaks)
   if(is.null(markTimeBy)){
     if(!is.null(markEpochsBy)){
       grIDs <- ts_changeindex(markEpochsBy)
@@ -7109,7 +7110,7 @@ plotNET_groupColour <- function(g, groups, colourV=TRUE, alphaV=1, colourE=FALSE
 
   # Add alpha to edges
   if(all(alphaE%[]%c(0,1))){
-    if(length(alphaE)==1|length(alphaE)==ecount(g)){
+    if(length(alphaE)==1|length(alphaE)==igraph::ecount(g)){
       igraph::E(g)$alpha <- alphaE
     } else {
       stop("Length of vector alphaE is not equal to 1 or ecount(g)")

@@ -8,13 +8,12 @@ recNetOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             y1 = NULL,
             standardise = "none",
-            Gweight = NULL,
-            Gdirect = NULL,
+            edgeWeight = "none",
             Glayout = NULL,
             LayoutA = 0,
             LayoutB = 0,
             Narcs = 4,
-            Glabels = NULL,
+            Glabels = TRUE,
             nsize = "degree",
             PruneDegree = 0,
             PruneWeight = 0,
@@ -51,12 +50,15 @@ recNetOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "unitScale",
                     "symbolicScale"),
                 default="none")
-            private$..Gweight <- jmvcore::OptionBool$new(
-                "Gweight",
-                Gweight)
-            private$..Gdirect <- jmvcore::OptionBool$new(
-                "Gdirect",
-                Gdirect)
+            private$..edgeWeight <- jmvcore::OptionList$new(
+                "edgeWeight",
+                edgeWeight,
+                options=list(
+                    "none",
+                    "si",
+                    "rt",
+                    "rf"),
+                default="none")
             private$..Glayout <- jmvcore::OptionList$new(
                 "Glayout",
                 Glayout,
@@ -79,13 +81,15 @@ recNetOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 default=4)
             private$..Glabels <- jmvcore::OptionBool$new(
                 "Glabels",
-                Glabels)
+                Glabels,
+                default=TRUE)
             private$..nsize <- jmvcore::OptionList$new(
                 "nsize",
                 nsize,
                 default="degree",
                 options=list(
                     "degree",
+                    "strength",
                     "hubscore",
                     "fixed"))
             private$..PruneDegree <- jmvcore::OptionNumber$new(
@@ -162,8 +166,7 @@ recNetOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             self$.addOption(private$..y1)
             self$.addOption(private$..standardise)
-            self$.addOption(private$..Gweight)
-            self$.addOption(private$..Gdirect)
+            self$.addOption(private$..edgeWeight)
             self$.addOption(private$..Glayout)
             self$.addOption(private$..LayoutA)
             self$.addOption(private$..LayoutB)
@@ -189,8 +192,7 @@ recNetOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     active = list(
         y1 = function() private$..y1$value,
         standardise = function() private$..standardise$value,
-        Gweight = function() private$..Gweight$value,
-        Gdirect = function() private$..Gdirect$value,
+        edgeWeight = function() private$..edgeWeight$value,
         Glayout = function() private$..Glayout$value,
         LayoutA = function() private$..LayoutA$value,
         LayoutB = function() private$..LayoutB$value,
@@ -215,8 +217,7 @@ recNetOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         ..y1 = NA,
         ..standardise = NA,
-        ..Gweight = NA,
-        ..Gdirect = NA,
+        ..edgeWeight = NA,
         ..Glayout = NA,
         ..LayoutA = NA,
         ..LayoutB = NA,
@@ -307,7 +308,7 @@ recNetResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "theiler",
                     "norm",
                     "standardise",
-                    "Gweight")))
+                    "edgeWeight")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="rnetplot",
@@ -332,14 +333,17 @@ recNetResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "fixed",
                     "theiler",
                     "norm",
-                    "Gdirect",
-                    "Gweight",
                     "Glayout",
                     "standardise",
                     "nsize",
                     "Glabels",
                     "PruneDegree",
-                    "PruneWeight")))}))
+                    "PruneWeight",
+                    "Glayout",
+                    "LayoutA",
+                    "LayoutB",
+                    "Narcs",
+                    "edgeWeight")))}))
 
 recNetBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "recNetBase",
@@ -366,8 +370,7 @@ recNetBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param data .
 #' @param y1 .
 #' @param standardise .
-#' @param Gweight .
-#' @param Gdirect .
+#' @param edgeWeight .
 #' @param Glayout .
 #' @param LayoutA .
 #' @param LayoutB .
@@ -407,13 +410,12 @@ recNet <- function(
     data,
     y1,
     standardise = "none",
-    Gweight,
-    Gdirect,
+    edgeWeight = "none",
     Glayout,
     LayoutA = 0,
     LayoutB = 0,
     Narcs = 4,
-    Glabels,
+    Glabels = TRUE,
     nsize = "degree",
     PruneDegree = 0,
     PruneWeight = 0,
@@ -444,8 +446,7 @@ recNet <- function(
     options <- recNetOptions$new(
         y1 = y1,
         standardise = standardise,
-        Gweight = Gweight,
-        Gdirect = Gdirect,
+        edgeWeight = edgeWeight,
         Glayout = Glayout,
         LayoutA = LayoutA,
         LayoutB = LayoutB,

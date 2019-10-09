@@ -29,12 +29,20 @@ options:
           title: "Symbolic representation"
       default: none
 
-    - name: Gweight
-      title: Weighted
-      type: Bool
-    - name: Gdirect
-      title: Directed
-      type: Bool
+    - name: edgeWeight
+      title: "Edges represent:"
+      type: List
+      options:
+       - name: none
+         title: "Connections (no weights)"
+       - name: si
+         title: "Distance in Recurrence Matrix"
+       - name: rt
+         title: "Recurrence Time"
+       - name: rf
+         title: "Recurrence Time Frequency"
+      default: none
+
     - name: Glayout
       title: Graph layout
       type: List
@@ -60,8 +68,9 @@ options:
       type: Number
       default: 4
     - name: Glabels
-      title: Add labels (time)
+      title: "Add labels (time)"
       type: Bool
+      default: true
 
     - name: nsize
       title: "Node size"
@@ -70,6 +79,8 @@ options:
       options:
        - name: degree
          title: "Node degree"
+       - name: strength
+         title: "Node strength (weighted network)"
        - name: hubscore
          title: "Node hubscore"
        - name: fixed

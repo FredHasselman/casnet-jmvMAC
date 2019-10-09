@@ -113,6 +113,15 @@ recNetClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             emDim <- self$options$emDim
             if(emDim<=0){emDim<-1}
 
+            weighted   <- TRUE
+            weightedBy <- "rt"
+            switch(self$options$edgeWeight,
+                none = weighted <- FALSE,
+                rt = weightedBy <- "rt",
+                rf = weightedBy <- "rf",
+                si = weightedBy <- "si",
+            )
+
             emRad <- NULL
             if(self$options$fixed%in%"RAD"){
                 emRad <- self$options$fixRAD
@@ -124,12 +133,11 @@ recNetClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if(self$options$fixed%in%"NO"){
                 RN <- rn(y1 = tsData$y1, emDim = emDim, emLag = emLag,
                          method = as.character(self$options$norm),
-                         directed = self$options$Gdirect, weighted = self$options$Gweight, weightedBy = "rt")
+                         directed = FALSE, weighted = weighted, weightedBy = weightedBy)
             } else {
                 RN <- rn(y1 = tsData$y1, emDim = emDim, emLag = emLag, emRad = emRad,
                          method = as.character(self$options$norm),
-                         directed = self$options$Gdirect, weighted = self$options$Gweight,
-                         weightedBy = "rt")
+                         directed = FALSE, weighted = weighted, weightedBy = weightedBy)
             }
 
             rpImage <- self$results$rpplot
@@ -189,10 +197,10 @@ recNetClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
               rm <- rpImage$state
 
-              RadiusRRbar <- FALSE
-              if(self$options$fixed%in%"NO"){
-                RadiusRRbar <- TRUE
-              }
+              # RadiusRRbar <- FALSE
+              # if(self$options$fixed%in%"NO"){
+              #   RadiusRRbar <- TRUE
+              # }
 
               #   if(plyr::is.discrete(df$y1)){
 
@@ -200,8 +208,7 @@ recNetClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                               plotDimensions = TRUE,
                               xlab = self$options$y1,
                               ylab = self$options$y1,
-                              radiusValue = attributes(rm)$emRad,
-                              plotRadiusRRbar = RadiusRRbar)
+                              radiusValue = attributes(rm)$emRad)
 
               print(rppl)
               TRUE
@@ -224,9 +231,10 @@ recNetClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               #rnet[rnet<=quantile(rnet[upper.tri(rnet)],self$options$Qtile)] <- 0
 
               mode <- "undirected"
-              if(self$options$Gdirect){
-                mode <- "directed"
-              }
+
+              # if(self$options$Gdirect){
+              #   mode <- "directed"
+              # }
 
 
               tvec <- 1:length(Matrix::diag(rnet))
@@ -235,8 +243,9 @@ recNetClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               rownames(rnet) <- formatC(tvec, width=w, flag="0")
 
               switch (self$options$nsize,
-                degree = nsize <- "degree",
+                degree = nsize   <- "degree",
                 hubscore = nsize <- "hubscore",
+                strength = nsize <- "strength",
                 fixed = nsize <- .3
               )
 
@@ -246,13 +255,14 @@ recNetClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               #         fixed = lsize <- .6
               # )
 
-              weighted <- NULL
+
               eweight  <- "weight"
-              if(self$options$Gweight){
-                  weighted <- TRUE
-              } else {
-                  eweight <- 1
+              weighted <- TRUE
+              if(self$options$edgeWeight=="none"){
+                  weighted <- NULL
+                  eweight  <- 1
               }
+
 
               g <- igraph::graph_from_adjacency_matrix(rnet, mode = mode, weighted = weighted, diag = FALSE)
 
@@ -273,12 +283,38 @@ recNetClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                      fe = layout <- "Fermat",
                      eu = layout <- "Euler")
 
+              if(self$options$LayoutA==0){
+                  switch(self$options$Glayout,
+                         ar = layoutA <- 1,
+                         be = layoutA <- 1,
+                         fe = layoutA <- 1,
+                         eu = layoutA <- 1)
+              } else {
+                  layoutA = 1
+              }
+              if(self$options$LayoutB==0){
+                  switch(self$options$Glayout,
+                         ar = layoutB <- 1,
+                         be = layoutB <- 0.1,
+                         fe = layoutB <- 1,
+                         eu = layoutB <- .5)
+              } else {
+                  LayoutB <- NULL
+              }
+
+              if(!self$options$Glabels){
+                  Glabels <- NULL
+              } else {
+                  Glabels <- TRUE
+              }
+
+
               gn <- make_spiral_graph(g = g,
                                       type = layout,
                                       arcs = self$options$Narcs,
-                                      a = self$options$LayoutA,
-                                      b = self$options$LayoutB,
-                                      markTimeBy = self$options$Glabels,
+                                      a = layoutA,
+                                      b = layoutB,
+                                      markTimeBy = Glabels,
                                       doPlot = FALSE)
 
 
