@@ -35,9 +35,12 @@ gg_plotHolder	gg_plotHolder
 gg_theme	gg_theme
 growth_ac	growth_ac
 growth_ac_cond	growth_ac_cond
+layout_as_spiral	layout_as_spiral
+make_spiral_focus	make_spiral_focus
+make_spiral_graph	make_spiral_graph
 MFDFA	MFDFA
 mif	mif
-mif_interlayer	mif_interlayer
+mi_interlayer	mi_interlayer
 mi_mat	mi_mat
 monoH	monoH
 newZ	newZ
@@ -53,6 +56,10 @@ plotRED_mif	plotRED_mif
 plotSUR_hist	plotSUR_hist
 recNet	recNet
 repmat	repmat
+rn	rn
+rn_plot	rn_plot
+rn_recSpec	rn_recSpec
+rn_scaleoGram	rn_scaleoGram
 roc_noise	roc_noise
 rp	rp
 rp_checkfix	rp_checkfix
@@ -60,6 +67,7 @@ rp_copy_attributes	rp_copy_attributes
 rp_lineDist	rp_lineDist
 rp_nzdiags	rp_nzdiags
 rp_plot	rp_plot
+rp_plot_jmv	rp_plot_jmv
 rp_size	rp_size
 rqaAU	rqaAU
 rqaCR	rqaCR
@@ -71,6 +79,7 @@ ssgUNI	ssgUNI
 ssg_gwf2long	ssg_gwf2long
 ssg_winnowing	ssg_winnowing
 statNet	statNet
+SWtestE	SWtestE
 symbolize	symbolize
 transM	transM
 try_CATCH	try_CATCH

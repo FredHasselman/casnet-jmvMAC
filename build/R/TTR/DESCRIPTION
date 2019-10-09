@@ -16,4 +16,4 @@ NeedsCompilation: yes
 Packaged: 2019-09-22 18:04:34 UTC; josh
 Repository: CRAN
 Date/Publication: 2019-09-23 08:20:06 UTC
-Built: R 3.3.0; x86_64-apple-darwin13.4.0; 2019-09-25 05:39:34 UTC; unix
+Built: R 3.3.0; x86_64-apple-darwin13.4.0; 2019-10-04 20:15:04 UTC; unix

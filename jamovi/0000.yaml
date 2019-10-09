@@ -1,7 +1,7 @@
 ---
 title: CASNET
 name: casnetjmv
-version: 0.0.8
+version: 0.0.9
 jms: '1.0'
 authors:
   - Fred Hasselman
@@ -116,7 +116,6 @@ analyses:
     name: tsLVL
     ns: casnetjmv
     menuGroup: casnetjmv
-    menuSubgroup: Time series features
     menuTitle: Detect levels & peaks
 
 ...

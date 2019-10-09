@@ -16,9 +16,25 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       y1 <- self$options$y1
       y2 <- self$options$y2
 
+
+      # Time variable ----
+      t <- self$options$time
+
       data <- self$data
-      Nna <- sum(is.na(data))
-      data <- na.omit(data)
+
+      if(!is.null(t)){
+        if(!jmvcore::canBeNumeric(data[[t]])){
+          t   <- "Time (generated)"
+          tNA <- 0
+        } else {
+          data[[t]] <- jmvcore::toNumeric(data[[t]])
+          tNA <- is.na(data[[t]])
+        }
+      } else {
+        t   <- "Time (generated)"
+        tNA <- 0
+      }
+
 
       if(is.factor(data[[y1]])|is.character(data[[y1]])){
         if(is.factor(data[[y1]])&is.ordered(data[[y1]])){
@@ -49,11 +65,36 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         v2_discretised <- "yes"
       }
 
-      v1 <- as.numeric_discrete(data[[y1]], sortUnique = TRUE)
-      v2 <- as.numeric_discrete(data[[y2]], sortUnique = TRUE)
+      Nna1 <- sum(is.na(data[[y1]]))
+      Nna2 <- sum(is.na(data[[y2]]))
+
+      idNA1 <- !is.na(data[[y1]])
+      idNA2 <- !is.na(data[[y2]])
+
+      data <- data[idNA1&idNA2,]
+
+      if(!jmvcore::canBeNumeric(data[[y1]])){
+        y1vec <- as.character(data[[y1]])
+      } else {
+        y1vec <- data[[y1]]
+      }
+      if(!jmvcore::canBeNumeric(data[[y2]])){
+        y2vec <- as.character(data[[y2]])
+      } else {
+        y2vec <- data[[y2]]
+      }
+
+      data <- na.omit(data)
+
+      v12 <- as.numeric_discrete(c(y1vec,y2vec), sortUnique = TRUE)
+      v1 <- v12[1:length(y1vec)]
+      v2 <- v12[(length(y1vec)+1):length(v12)]
+
+      # v1 <- as.numeric_discrete(data[[y1]], sortUnique = TRUE)
+      # v2 <- as.numeric_discrete(data[[y2]], sortUnique = TRUE)
 
       # Variable 1 ----
-      v1 <- as.numeric_discrete(data[[y1]], sortUnique = TRUE)
+     # v1 <- as.numeric_discrete(data[[y1]], sortUnique = TRUE)
 
       # Get labels in data (obs, if any)
        v1_labs_obs    <- unique(names(v1))
@@ -73,7 +114,7 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
        # Variable 2 ----
-       v2 <- as.numeric_discrete(data[[y2]],sortUnique = TRUE)
+      # v2 <- as.numeric_discrete(data[[y2]],sortUnique = TRUE)
 
        # Get labels in data (obs, if any)
        v2_labs_obs    <- unique(names(v2))
@@ -97,18 +138,18 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
        warningMessage2b <- paste("- if more states were possible, please specify missing categories!")
 
 
-       # v2_Nstates_usr <- self$options$v2_Nstates
-       if(v1_Nstates_usr>v1_Nlabs_obs){
-         if(v1_Nstates_usr==(v1_Nlabs_obs+v1_Nlabs_usr)){
-           v1_labs_usr  <- c(v1_labs_usr,v1_labs_obs)
-           v1_Nlabs_usr <- length(v1_labs_usr)
-         }}
-
-       if(v2_Nstates_usr>v2_Nlabs_obs){
-         if(v2_Nstates_usr==(v2_Nlabs_obs+v2_Nlabs_usr)){
-           v2_labs_usr  <- c(v2_labs_usr,v2_labs_obs)
-           v2_Nlabs_usr <- length(v2_labs_usr)
-         }}
+       # # v2_Nstates_usr <- self$options$v2_Nstates
+       # if(v1_Nstates_usr>v1_Nlabs_obs){
+       #   if(v1_Nstates_usr==(v1_Nlabs_obs+v1_Nlabs_usr)){
+       #     v1_labs_usr  <- c(v1_labs_usr,v1_labs_obs)
+       #     v1_Nlabs_usr <- length(v1_labs_usr)
+       #   }}
+       #
+       # if(v2_Nstates_usr>v2_Nlabs_obs){
+       #   if(v2_Nstates_usr==(v2_Nlabs_obs+v2_Nlabs_usr)){
+       #     v2_labs_usr  <- c(v2_labs_usr,v2_labs_obs)
+       #     v2_Nlabs_usr <- length(v2_labs_usr)
+       #   }}
 
 
       # if(v1_Nlabs_usr>0&v1_Nstates_usr>0){
@@ -134,7 +175,9 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       #     warningMessage1b <- paste("-", v1_Nstates_usr, "were expected,",v1_Nlabs_obs,"were provided.")
       #     LABS_v1 <- c(v1_labs_obs, v2_labs_usr)
       #   }
+
         y1_ready <- TRUE
+
       # }
       #
       # NLABS_V2 <- v2_Nlabs_obs + v2_Nlabs_obs
@@ -152,38 +195,38 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
          y2_ready <- TRUE
       # }
       #
-      # self$results$warnings$setContent(paste(paste(warningMessage1a,warningMessage1b),
-      #                                        paste(warningMessage2a,warningMessage2b),sep="\n"))
-      #
+
+       self$results$warnings$setContent(paste(paste(warningMessage1a,warningMessage1b),
+                                              paste(warningMessage2a,warningMessage2b),sep="\n"))
 
       if(all(y1_ready,y2_ready)){
 
-        COORD_v1 <- sort(unique(v1))
-        COORD_v2 <- sort(unique(v2))
+        COORD_v1 <- unique(sort(v1))
+        COORD_v2 <- unique(sort(v2))
 
-        LABS_v1 <- sort(unique(names(v1)))
-        LABS_v2 <- sort(unique(names(v2)))
+        LABS_v1 <- unique(names(sort(v1)))
+        LABS_v2 <- unique(names(sort(v2)))
 
         NLABS_V1 <- length(LABS_v1)
         NLABS_V2 <- length(LABS_v2)
 
         # SSG
-        ssg <- matrix(data = 0, nrow = NLABS_V1,ncol= NLABS_V2, dimnames = list(LABS_v1,LABS_v2))
-        dlist <-list(LABS_v1,LABS_v2)
+        ssg   <- matrix(data = 0, nrow = NLABS_V1,ncol= NLABS_V2, dimnames = list(LABS_v1,LABS_v2))
+        dlist <- list(LABS_v1,LABS_v2)
         names(dlist) <- c(y1,y2)
 
-        ssg_freq <- as.data.frame(arrayInd(which(ssg==0),.dim = dim(ssg), .dimnames = dlist,useNames = TRUE))
+        ssg_freq       <- as.data.frame(arrayInd(which(ssg==0),.dim = dim(ssg), .dimnames = dlist,useNames = TRUE))
         ssg_freq$combi <- interaction(ssg_freq[[1]],ssg_freq[[2]])
 
         # Expected Grid ----
         ssg      <- data.frame(expand.grid(y1.labs=LABS_v1,y2.labs=LABS_v2),expand.grid(y1=COORD_v1,y2=COORD_v2))
         colnames(ssg) <- c(y1,y2,paste0("COORD.",y1),paste0("COORD.",y2))
-        ssg$cell <- paste0(ssg[,1],".",ssg[,2])
-        ssg$loc <- paste0("[",ssg[,3],",",ssg[,4],"]")
+        ssg$cell  <- paste0(ssg[,1],".",ssg[,2])
+        ssg$loc   <- paste0(ssg[,3],".",ssg[,4])
         ssg$value <- NA
 
-        for(i in ssg[,3]){
-          ssg$value[ssg[,3]==i] <-  i:(i+max(ssg[,4])-1)%%2
+        for(i in unique(ssg[,3])){
+          ssg$value[ssg[,3]==i] <-  (i:(i+max(ssg[,4])-1)%%2)[seq_along(ssg$value[ssg[,3]==i])]
         }
         ssg$value <- factor(ssg$value)
 
@@ -192,21 +235,12 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # }
         # ssg$value <- factor(ssg$value)
 
-        # Time variable ----
-        t <- self$options$time
-        if(!is.null(t)){
-          data[[t]] <- jmvcore::toNumeric(data[[t]])
-          tNA <- is.na(data[[t]])
-        } else {
-          t   <- "Time (generated)"
-          tNA <- 0
-        }
-
         # Handle Trajectories and Waves ----
         SSG_cell_obs   <- paste0(v1,".",v2)
+        #SSG_labs_obs   <- paste0(names(v1),".",names(v2))
 
         #SSG_cell_obs   <- factor(paste0(v1,".",v2))
-        SSG_cell_unobs <- ssg$cell[!ssg$cell%in%SSG_cell_obs]
+        SSG_cell_unobs <- ssg$cell[!ssg$loc%in%SSG_cell_obs]
 
         if(is.null(self$options$trajectories)){
           traj_ID <- c("A")
@@ -254,18 +288,41 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               tvec <- as.numeric(data[[t]][trajs&wavs])
             }
 
-            durations <- ts_duration(cell_obs, timeVec = tvec)
+            durations  <- casnetjmv::ts_duration(labs_obs, timeVec = tvec)
+            durations2 <- casnetjmv::ts_duration(cell_obs, timeVec = tvec)
+            durations$y.value <- durations2$y.name
+            rm(durations2)
             durations$duration.time <- abs(durations$duration.time)
-            durations$Trajectory = traj
-            durations$Wave = wav
+            durations$Trajectory <- traj
+            durations$Wave  <- wav
             durations$value <- NA
-            durations$value <- factor(plyr::laply(durations$y.name,function(t){as.numeric(paste(ssg$value[ssg$cell%in%t]))}))
+            durations$value <- factor(plyr::laply(durations$y.name,function(tt){as.numeric(paste(ssg$value[ssg$cell%in%tt]))}))
 
-            durations$x.from <- plyr::laply(durations$y.name,function(t){as.numeric(ssg[,3][ssg$cell%in%t])})
-            durations$y.from <- plyr::laply(durations$y.name,function(t){as.numeric(ssg[,4][ssg$cell%in%t])})
-            durations$y1 <- plyr::laply(strsplit(paste(durations$y.name),"[.]"),function(n1){n1[1]}) #, labels = LABS_v1)
-            durations$y2 <- plyr::laply(strsplit(paste(durations$y.name),"[.]"),function(n1){n1[2]}) #, labels = LABS_v2)
+            durations$y1      <- plyr::laply(strsplit(paste(durations$y.value),"[.]"),function(n1){n1[1]})
+            durations$y2      <- plyr::laply(strsplit(paste(durations$y.value),"[.]"),function(n2){n2[2]})
+            durations$x.from  <- durations$y1 #plyr::laply(durations$y.name,function(t){as.numeric(ssg[,3][ssg$cell%in%t])})
+            durations$y.from  <- durations$y2   #plyr::laply(durations$y.name,function(t){as.numeric(ssg[,4][ssg$cell%in%t])})
+            durations$y1      <- plyr::laply(strsplit(paste(durations$y.value),"[.]"),function(n1){n1[1]})
+            durations$y2      <- plyr::laply(strsplit(paste(durations$y.value),"[.]"),function(n2){n2[2]})
+            durations$y1_labs <- plyr::laply(strsplit(paste(durations$y.name),"[.]"),function(n1){n1[1]})
+            durations$y2_labs <- plyr::laply(strsplit(paste(durations$y.name),"[.]"),function(n2){n2[2]})
             durations$trajectory.id <- 1:NROW(durations)
+
+            # durations <- ts_duration(labs_obs, timeVec = tvec)
+            # durations$duration.time <- abs(durations$duration.time)
+            # durations$Trajectory = traj
+            # durations$Wave = wav
+            # durations$value   <- NA
+            # durations$value   <- factor(plyr::llply(durations$y.name,function(tt){as.numeric(paste(ssg$value[ssg$cell%in%as.character(tt)]))}))
+            # durations$x.from  <- plyr::laply(durations$y.name,function(tt){as.numeric(ssg[,3][ssg$cell%in%tt])})
+            # durations$y.from  <- plyr::laply(durations$y.name,function(tt){as.numeric(ssg[,4][ssg$cell%in%tt])})
+            # durations$y1      <- plyr::laply(strsplit(paste(cell_obs),"[.]"),function(n1){n1[1]})
+            # durations$y2      <- plyr::laply(strsplit(paste(cell_obs),"[.]"),function(n1){n1[2]})
+            # durations$y1_labs <- plyr::laply(strsplit(paste(labs_obs),"[.]"),function(n1){n1[1]})
+            # durations$y2_labs <- plyr::laply(strsplit(paste(labs_obs),"[.]"),function(n1){n1[2]})
+            # # durations$y1 <- plyr::laply(strsplit(paste(durations$y.name),"[.]"),function(n1){n1[1]}) #, labels = LABS_v1)
+            # # durations$y2 <- plyr::laply(strsplit(paste(durations$y.name),"[.]"),function(n1){n1[2]}) #, labels = LABS_v2)
+            # durations$trajectory.id <- 1:NROW(durations)
 
             # durations$y1_labs <- plyr::laply(durations$y1, function(l){unique(names(v1)[v1==l])})
             # durations$y2_labs <- plyr::laply(durations$y2, function(l){unique(names(v2)[v2==l])})
@@ -307,11 +364,11 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         checkerboardObs <- sort(as.character(unique(dur_data$y.name)))
         tmp <- ssg[!ssg$cell%in%checkerboardObs,]
         if(NROW(tmp)>=1){
-        dur_data <- dplyr::add_row(dur_data,.id = "unobs", y1 = tmp[[y1]], y2 = tmp[[y2]], y.name = tmp$cell, value = NA)
+         dur_data <- dplyr::add_row(dur_data,.id = "unobs", y1 = tmp[[y1]], y2 = tmp[[y2]], y.name = tmp$cell, value = NA)
         }
 
-        dur_data$y1 <- factor(as.numeric(dur_data$y1),ordered = TRUE)
-        dur_data$y2 <- factor(as.numeric(dur_data$y2),ordered = TRUE)
+        dur_data$y1 <- factor(dur_data$y1,ordered = TRUE)
+        dur_data$y2 <- factor(dur_data$y2,ordered = TRUE)
 
         TStable <- self$results$tblTS
 
@@ -321,7 +378,7 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                          var = y1,
                          vlevel = y1.vlevel,
                          N   = NROW(na.omit(data[[y1]])),
-                         na  = Nna,
+                         na  = Nna1,
                          uni_obs = v1_Nlabs_obs,
                          uni_exp = v1_Nlabs_obs,
                          discretised = "")
@@ -332,7 +389,7 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                          var = y2,
                          vlevel = y2.vlevel,
                          N   = NROW(na.omit(data[[y2]])),
-                         na  = Nna,
+                         na  = Nna2,
                          uni_obs = v2_Nlabs_obs,
                          uni_exp = v2_Nlabs_obs,
                          discretised = "")
@@ -373,7 +430,8 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         traj_data_state <- SSG_obs %>% dplyr::group_by(Trajectory,Wave) %>%
           dplyr::summarise(TRAJvisited    = sum(Nvisits, na.rm = TRUE),
                            MNdurationTRAJ = mean(MNduration, na.rm = TRUE),
-                           SDdurationTRAJ = stats::sd(MNduration, na.rm = TRUE))
+                           SDdurationTRAJ = stats::sd(MNduration, na.rm = TRUE)
+                           )
 
         SSGtableTrajectories <- self$results$tblSSGtrajectories
         for (j in seq_along(traj_data$Trajectory)){
@@ -580,22 +638,55 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         durData$y.fromRND[bar$data[[2]]$group] <- bar$data[[2]][['y']]
 
         trajectories          <- durData
-        trajectories$x.to     <- c(durData$x.from[seq_along(durData$x.from)[-1]],NA)
-        trajectories$y.to     <- c(durData$y.from[seq_along(durData$y.from)[-1]],NA)
-        trajectories$x.toRND  <- c(durData$x.fromRND[seq_along(durData$x.fromRND)[-1]],NA)
-        trajectories$y.toRND  <- c(durData$y.fromRND[seq_along(durData$y.fromRND)[-1]],NA)
+        trajectories$x.from   <- as.numeric(trajectories$x.from)
+        trajectories$y.from   <- as.numeric(trajectories$x.from)
+
+        trajectories$x.to     <- as.numeric(c(durData$x.from[seq_along(durData$x.from)[-1]],NA))
+        trajectories$y.to     <- as.numeric(c(durData$y.from[seq_along(durData$y.from)[-1]],NA))
+        trajectories$x.toRND  <- as.numeric(c(durData$x.fromRND[seq_along(durData$x.fromRND)[-1]],NA))
+        trajectories$y.toRND  <- as.numeric(c(durData$y.fromRND[seq_along(durData$y.fromRND)[-1]],NA))
         trajectories          <- trajectories[1:(NROW(trajectories)-1),]
         trajectories$size     <- factor(cut(trajectories$duration.samples, 4, include.lowest = TRUE, ordered_result = TRUE, labels = FALSE, right = TRUE))
 
-        first <- trajectories[trajectories$trajectory.id==1,]
-        last  <- trajectories[(NROW(trajectories)),]
+        # first <- trajectories[trajectories$trajectory.id==1,]
+        # last  <- trajectories[(NROW(trajectories)),]
 
-        mark <- na.omit(plyr::ldply(list(First=first, Last = last)))
+        first <- trajectories %>% filter(trajectories$trajectory.id==1)
+        if(NROW(first)==1){
+          last  <- first
+        } else {
+          last  <- trajectories[which(trajectories$trajectory.id==max(trajectories$trajectory.id, na.rm = TRUE)),]
+        }
+        if(identical(first,last)){
+          last$x.from <- first$x.to
+          last$y.from <- first$y.to
+          last$x.fromRND <- first$x.toRND
+          last$y.fromRND <- first$y.toRND
+          last$x.to <- as.numeric(last$x.to)+.05
+          last$y.to <- as.numeric(last$y.to)+.05
+          last$x.toRND <- last$x.to
+          last$y.toRND <- last$y.to
+        }
+
+        mark <- plyr::ldply(list(First=data.frame(first), Last = data.frame(last)))
+
         #mark$.id <- relevel(factor(mark$.id),ref=first[1])
         #mark$size <- mark$size*1.2
 
-        LABS_v1 <- paste(unique(durData$y1))
-        LABS_v2 <- paste(unique(durData$y2))
+        COORD_v1 <- as.numeric(unique(sort(na.omit(durData$y1))))
+        COORD_v2 <- as.numeric(unique(sort(na.omit(durData$y2))))
+
+        LABS_v1 <- unlist(plyr::llply(COORD_v1, function(l) unique(na.omit(durData$y1_labs[durData$y1==l]))))
+        LABS_v2 <- unlist(plyr::llply(COORD_v2, function(l) unique(na.omit(durData$y2_labs[durData$y2==l]))))
+
+        Iv1 <- ts_trimfill(x=COORD_v1,y=as.numeric_discrete(LABS_v1),action = "trim.cut")
+        Iv2 <- ts_trimfill(x=COORD_v2,y=as.numeric_discrete(LABS_v2),action = "trim.cut")
+
+        COORD_v1 <- Iv1[[1]]
+        LABS_v1 <-  names(Iv1[[2]])
+
+        COORD_v2 <- Iv2[[1]]
+        LABS_v2 <-  names(Iv2[[2]])
 
         flist <- c("0" = "grey80","1" = "grey50", "NA" = "white")
         clist <- c("Last" = "red3","First" = "steelblue4", "NA" = "orange")
@@ -612,38 +703,65 @@ ssgBIClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             }
           facPal <- scales::col_factor(palette="Set1", domain=NULL)(Ncol)
-          pal <- scales::gradient_n_pal(colours = facPal)(seq(0,1,length.out = (length(unique(na.omit(trajectories$Trajectory:trajectories$Wave)))+1)))
+          pal <- scales::gradient_n_pal(colours = facPal)(seq(0,1, length.out = (length(unique(na.omit(trajectories$Trajectory:trajectories$Wave)))+1)))
         } else {
           pal <- "#AAB2A9"
         }
 
-        ssgr <- ggplot2::ggplot(durData, ggplot2::aes(x=y1,y=y2,group=y.name)) +
-          ggplot2::geom_raster(ggplot2::aes(fill=value), alpha =.5, show.legend = FALSE) +
+        ssgr <- ggplot2::ggplot(durData, ggplot2::aes(x=y1,
+                                                      y=y2,
+                                                      group=y.name)) +
+          ggplot2::geom_raster(ggplot2::aes(fill=value),
+                               alpha =.5,
+                               show.legend = FALSE) +
           ggplot2::geom_point(data = trajectories,
-                              ggplot2::aes(x = x.fromRND, y = y.fromRND, size= size),
-                              fill="steelblue", colour="black", alpha=.5, pch = 21, show.legend = FALSE) +
+                              ggplot2::aes(x = x.fromRND,
+                                           y = y.fromRND,
+                                           size= size),
+                              fill="steelblue",
+                              colour="steelblue4",
+                              alpha=.5,
+                              pch = 21,
+                              show.legend = FALSE) +
           ggplot2::geom_point(data = mark,
-                              ggplot2::aes(x = x.fromRND, y = y.fromRND, size= size),
-                              fill="steelblue", colour="springgreen", alpha=1, pch = 21, show.legend = FALSE) +
-          ggplot2:: geom_curve(data=trajectories, ggplot2::aes(x = x.fromRND, y = y.fromRND,
-                                                               xend = x.toRND, yend = y.toRND, colour = Trajectory:Wave),
+                              ggplot2::aes(x = x.fromRND,
+                                           y = y.fromRND,
+                                           size= size),
+                              fill="steelblue1",
+                              colour="steelblue4",
+                              alpha=.8,
+                              pch = 21,
+                              show.legend = FALSE) +
+          ggplot2:: geom_curve(data=trajectories, ggplot2::aes(x = x.fromRND,
+                                                               y = y.fromRND,
+                                                               xend = x.toRND,
+                                                               yend = y.toRND,
+                                                               colour = Trajectory:Wave),
                                lineend = "butt", curvature = 0.2, angle = 120, ncp=10,
                                arrow= grid::arrow(angle = 20, length = grid::unit(0.02, units = "npc"), type = "closed"),
                                alpha = .8, size=1, show.legend = FALSE,arrow.fill = NULL) +
-          ggplot2::geom_curve(data = mark, ggplot2::aes(x = x.fromRND, y = y.fromRND,
-                                                        xend = x.toRND, yend = y.toRND, colour = Trajectory:Wave),
-                              lineend = "butt", curvature = 0.2, angle = 120, ncp=10,
+          ggplot2::geom_curve(data = mark, ggplot2::aes(x = x.fromRND,
+                                                        y = y.fromRND,
+                                                        xend = x.toRND,
+                                                        yend = y.toRND,
+                                                        colour = Trajectory:Wave),
+                              lineend = "butt",
+                              curvature = 0.2,
+                              angle = 120,
+                              ncp=10,
                               arrow= grid::arrow(angle = 20, length = grid::unit(0.03, units = "npc"), type = "closed"),
                               alpha=1, size=1, arrow.fill = NULL) +
           ggplot2::guides(colour = "legend",size="none",fill="none") +
           ggplot2::scale_color_manual("Trajectory", values = pal, na.translate = FALSE) +
           ggplot2::scale_fill_manual(values = flist) +
           ggplot2::scale_size_manual(breaks = 1:4,values = slist) +
-          ggplot2::scale_x_discrete(paste(self$options$y1),expand = c(0,0),breaks = LABS_v1, labels = LABS_v1) +
-          ggplot2::scale_y_discrete(paste(self$options$y2),expand = c(0,0),breaks = LABS_v2, labels = LABS_v2) +
-         # ggplot2::coord_equal(length(LABS_v1)/length(LABS_v1)) +
+          ggplot2::scale_x_discrete(paste(self$options$y1),breaks = COORD_v1, labels = LABS_v1) +
+          ggplot2::scale_y_discrete(paste(self$options$y2),breaks = COORD_v2, labels = LABS_v2) +
+          ggplot2::coord_fixed(ratio = length(LABS_v2)/length(LABS_v1)) +
           ggplot2::theme_bw() +
-          ggplot2::theme(panel.grid.major = ggplot2::element_blank())
+          ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                         panel.grid.minor = ggplot2::element_line(colour = "grey70"),
+                         axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
         plot(ssgr)
         TRUE

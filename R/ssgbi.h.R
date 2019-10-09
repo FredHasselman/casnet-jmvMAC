@@ -58,8 +58,6 @@ ssgBIOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 suggested=list(
                     "ordinal",
                     "continuous"),
-                permitted=list(
-                    "numeric"),
                 default=NULL)
             private$..trajectories <- jmvcore::OptionVariable$new(
                 "trajectories",
@@ -68,8 +66,6 @@ ssgBIOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 suggested=list(
                     "ordinal",
                     "nominal"),
-                permitted=list(
-                    "factor"),
                 default=NULL)
             private$..waves <- jmvcore::OptionVariable$new(
                 "waves",
@@ -78,8 +74,6 @@ ssgBIOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 suggested=list(
                     "ordinal",
                     "nominal"),
-                permitted=list(
-                    "factor"),
                 default=NULL)
             private$..v1_labels <- jmvcore::OptionString$new(
                 "v1_labels",
@@ -522,8 +516,6 @@ ssgBI <- function(
             `if`( ! missing(trajectories), trajectories, NULL),
             `if`( ! missing(waves), waves, NULL))
 
-    for (v in trajectories) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
-    for (v in waves) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- ssgBIOptions$new(
         y1 = y1,

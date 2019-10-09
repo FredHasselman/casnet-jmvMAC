@@ -1,4 +1,5 @@
 MFDFA                   Multi-fractal Detrended Fluctuation Analysis
+SWtestE                 Small World test
 add_alpha               Add transparency to a colour
 as.numeric_character    Character vector to named numeric vector
 as.numeric_discrete     Discrete (factor or character) to numeric
@@ -32,15 +33,18 @@ gg_theme                gg_theme
 growth_ac               Examples of dynamical growth models (maps)
 growth_ac_cond          Examples of conditional dynamical growth models
                         (maps)
+layout_as_spiral        Layout a graph on a spiral
+make_spiral_focus       Spiral Graph with Epoch Focus
+make_spiral_graph       Make Spiral Graph
+mi_interlayer           Inter-layer mutual information
 mi_mat                  Mutual Information variations
 mif                     Mutual Information Function
-mif_interlayer          Inter-layer mutual information
 pacf_fisherZ            FisherZ for PACF
 plotFD_loglog           Plot output from fluctuation analyses based on
                         log-log regression
 plotNET_BA              Example of Barabasi scale-free network
 plotNET_SW              Example of Strogatz-Watts small-world network
-plotNET_groupColour     Vertex Group Colours
+plotNET_groupColour     Vertex and Edge Group Colours
 plotNET_groupWeight     Set Edge weights by group
 plotNET_prep            Plot Network Based on RQA
 plotRED_acf             Plot ACF and PACF
@@ -48,11 +52,17 @@ plotRED_mif             Plot various MI functions
 plotSUR_hist            Surrogate Test
 recNet                  Recurrence Networks
 repmat                  Repeat Copies of a Matrix
+rn                      Create a Recurrence Network Matrix
+rn_plot                 Plot (thresholded) distance matrix as a network
+rn_recSpec              Recurrence Time Spectrum
+rn_scaleoGram           Recurrence Time Scaleogram
 rp                      Create a Distance Matrix
 rp_copy_attributes      Copy Matrix Attributes
 rp_lineDist             Line length distributions
 rp_nzdiags              rp_nzdiags
 rp_plot                 Plot (thresholded) distance matrix
+rp_plot_jmv             Plot (thresholded) distance matrix as a
+                        recurrence plot
 rp_size                 rp_size
 rqaAU                   Auto RQA
 rqaCR                   Cross RQA
